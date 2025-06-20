@@ -9,24 +9,26 @@
 <body>
     <section>
         <main>
-            <div id="logo">
-                <div class="left">
-                    <img src="assets/logo.png" alt="WAMO Logo">
+            <form action="/play">
+                <div id="logo">
+                    <div class="left">
+                        <img src="assets/logo.png" alt="WAMO Logo">
+                    </div>
+                    <div class="right">
+                        <span class="title">WAMO</span>
+                        <span class="description">Washington Math Organization</span>
+                    </div>
                 </div>
-                <div class="right">
-                    <span class="title">WAMO</span>
-                    <span class="description">Washington Math Organization</span>
+                <div class="field">
+                    <div class="header">Room Password</div>
+                    <input required name="pwd">
                 </div>
-            </div>
-            <div class="field">
-                <div class="header">Room Password</div>
-                <input>
-            </div>
-            <div class="field">
-                <div class="header">Name</div>
-                <input>
-            </div>
-            <button id="submit">Enter</button>
+                <div class="field">
+                    <div class="header">Name</div>
+                    <input name="name" required>
+                </div>
+                <button id="submit">Enter</button>
+            </form>
             <p>Or <a href="/register">register</a>  an account</p>
         </main>
         <div id="divider"></div>
