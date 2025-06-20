@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+*, *::before, *::after{
+    box-sizing: border-box;
+}
+
+:root{
+    --width: min(1200px, calc(100vw - 50px));
+    --padding: calc(50vw - var(--width) / 2);
+
+    --theme: #2A6E58;
+}
