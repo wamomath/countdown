@@ -127,6 +127,17 @@ a:hover{
     text-decoration: underline;
 }
 
+.error{
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #f43f5e;
+    border-radius: 4px;
+    background: #fecdd3;
+    color: #4c0519;
+    font-weight: 600;
+    display: none;
+}
+
 @media (max-width: 1000px){
     #divider{
         display: none;
