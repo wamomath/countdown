@@ -2,13 +2,18 @@ const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const fs = require("fs")
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
 let ROOMS = {
-    "WAMO": "countdown"
+    "WAMO": {
+        key: "countdown",
+        owner: "admin",
+        devices: []
+    }
 } // Room Name : Room Key
 
 io.on("connection", (socket) => {
@@ -17,6 +22,10 @@ io.on("connection", (socket) => {
 
 app.get("/", (req, res) => {
     res.sendFile(__dirname + "/lander.html")
+})
+
+app.get("/admin", (req, res) => {
+    res.sendFile(__dirname + "/admin.html")
 })
 
 app.get("/play", (req, res) => {
@@ -29,7 +38,7 @@ app.get("/play", (req, res) => {
         return
     }
 
-    if (ROOMS[room] !== key){
+    if (ROOMS[room].key !== key){
         res.redirect('/?err=1')
         return
     }
@@ -57,10 +66,18 @@ app.get("/scripts/lander.js", (req, res) => {
 app.get("/styles/play.css", (req, res) => {
     res.sendFile(__dirname + "/styles/play.css")
 })
+
+app.get("/scripts/admin.js", (req, res) => {
+    res.sendFile(__dirname + "/scripts/admin.js")
+})
+
+app.get("/styles/admin.css", (req, res) => {
+    res.sendFile(__dirname + "/styles/admin.css")
+})
 app.get("/assets/logo.png", (req, res) => {
     res.sendFile(__dirname + "/assets/logo.png")
 })
 
-server.listen(3000, () => {
+server.listen(8000, () => {
     console.log("Server online at port *:3000")
 });

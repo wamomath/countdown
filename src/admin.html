@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/admin.css">
+    <title>Countdown Manager</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+</head>
+<body>
+<header>
+    <div class="left">
+        ADMIN PANEL
+    </div>
+    <div class="right">
+        <div id="name">
+            REGISTERED AS
+        </div>
+        <div id="status">
+            AUTHENTICATING WITH SERVER
+        </div>
+    </div>
+</header>
+
+<main>
+    <aside id="devices">
+        <h1>Devices Connected</h1>
+        <div id="devices_wrapper">
+            <div class="user_wrapper">
+                <div class="user">
+                    <div class="device">
+                        <div class="left">
+                            <div class="head">Wesley's Laptop</div>
+                            <div class="ip">192.168.0.1</div>
+                        </div>
+                        <div class="status">CONNECTED</div>
+                    </div>
+                </div>
+                <button class="user_options"><i class="fa-solid fa-gear"></i></button>
+            </div>
+
+        </div>
+    </aside>
+    <div id="divider"></div>
+    <aside id="navigation">
+        <div id="controls">
+            <button class="action">Upload Question Set</button>
+        </div>
+    </aside>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="scripts/admin.js"></script>
+</body>
+</html>
