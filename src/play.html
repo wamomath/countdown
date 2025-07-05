@@ -4,11 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/play.css">
-    <title>Countdown Manager</title>
+    <link rel="stylesheet" href="styles/cmu.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
+
+
+    <title>Countdown Player</title>
 </head>
 <body>
     <main>
+        <div id="waiting">
+            <h1 class="header">Please wait for the host to grant you access</h1>
+            <p>Take this moment to review the rules</p>
+            <div id="rules">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras volutpat, urna eget finibus laoreet, erat nunc dignissim nunc, a accumsan orci ligula vel velit. Phasellus hendrerit sem eu enim tincidunt, ac lacinia turpis tempus. Suspendisse ac venenatis odio. Donec ac hendrerit mauris, quis fringilla purus. Nunc mattis nisl a augue pulvinar, id aliquam nulla lobortis. Quisque maximus euismod purus, non efficitur sapien congue consectetur. Phasellus tellus libero, tempor ac convallis a, aliquet at lectus. Donec vulputate leo sed tincidunt mattis. Ut et lorem et turpis ullamcorper pellentesque. Mauris non hendrerit magna. In hac habitasse platea dictumst. Donec et sem condimentum, semper nibh in, posuere velit. Sed a nulla leo.
 
+                Quisque semper consectetur tempus. Etiam vel eros nec sapien bibendum commodo et quis lorem. Aliquam sit amet leo porttitor, tristique sem eu, placerat leo. Mauris vehicula tortor quam, vel tempus nunc finibus at. Vivamus quis turpis suscipit nisi faucibus accumsan. Aliquam malesuada elit vel nunc pretium, sed consequat urna luctus. Suspendisse ornare eros massa, sed bibendum enim convallis in. Cras congue neque et ligula facilisis, vitae fringilla nulla eleifend. Mauris felis magna, feugiat id nulla eu, egestas mattis enim.
+
+                In eleifend velit quis massa aliquam cursus. Aliquam erat volutpat. Curabitur placerat nibh a justo ultrices ultricies. Duis gravida enim et ipsum fringilla, sed pulvinar turpis vulputate. Morbi pharetra nisi et vestibulum varius. Quisque ullamcorper mi eu sapien maximus, lobortis luctus massa luctus. Nullam dictum orci nec semper tristique. Aenean laoreet ante id posuere fermentum. Duis laoreet non velit in maximus. Aenean ultricies nec augue sit amet rhoncus.
+
+                Nullam bibendum eget neque finibus viverra. Mauris libero risus, bibendum non sagittis sed, vestibulum vitae mauris. Vestibulum eu faucibus lorem, ut rhoncus dui. In hac habitasse platea dictumst. Etiam vitae tempus purus. Vestibulum aliquet mauris non odio sodales, ut malesuada dolor condimentum. Pellentesque ac purus in libero tristique vestibulum. Morbi nec lacinia risus. Vestibulum sit amet nibh condimentum, imperdiet tortor sit amet, sagittis erat. Aenean aliquam elit et odio pellentesque rutrum. Donec a lacus sodales, cursus purus mattis, congue arcu. Morbi aliquet laoreet arcu nec blandit. Maecenas ultrices neque sapien, quis hendrerit dui viverra id. Nullam vitae rhoncus dolor, sed interdum justo. Nunc tincidunt consequat sapien in finibus. Aenean vitae blandit dolor.
+
+                Aenean risus libero, tincidunt sed elit nec, elementum dictum tortor. Donec porttitor lorem placerat, dictum sapien et, luctus velit. Nunc id urna sollicitudin, lacinia lectus vitae, interdum massa. Sed rhoncus, purus a egestas feugiat, mauris diam dignissim odio, id porta nunc enim eget enim. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent pharetra eget nulla id tincidunt. Sed aliquet scelerisque sapien, ac laoreet odio porttitor vel. Duis feugiat, odio quis tempor mollis, mauris leo porttitor est, quis lobortis dui enim vitae nisi.
+
+
+            </div>
+        </div>
+        <div id="questions"></div>
     </main>
     <footer>
         <div class="left">
@@ -24,7 +46,10 @@
         </div>
     </footer>
 
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" integrity="sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="scripts/play.js"></script>
+    <script src="scripts/play.js" type="module"></script>
 </body>
 </html>

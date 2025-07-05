@@ -2,7 +2,8 @@ const PARAMS = new URLSearchParams(window.location.search)
 const ERRORS = {
     "0": "Invalid room name",
     "1": "Incorrect room key",
-    "2": "Please enter your name"
+    "2": "Please enter your name",
+    "3": "The host denied you access"
 }
 
 window.onload = () => {

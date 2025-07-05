@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/creator.css">
+    <link rel="stylesheet" href="styles/cmu.css">
+    <title>Countdown Manager</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+</head>
+<body>
+<header>
+    <div class="left">
+    ADMIN TOOLS
+    </div>
+    <div class="right">
+        <a href="/">Home</a>
+    </div>
+</header>
+
+<main>
+    <h1>Problem Creator</h1>
+
+    <div id="wrapper">
+
+    </div>
+
+    <div id="new">NEW PROBLEM</div>
+    <div id="buttons">
+        <a id="export" download="Countdown_Problems.json" href=""><button class="action">Export</button></a>
+        <button class="action" id="copy">Copy</button>
+    </div>
+</main>
+
+<template id="problem_template">
+    <div class="problem_wrapper">
+        <div class="numbering">SLIDE</div>
+        <div class="problem">
+            <textarea id="textarea" data-id="1" placeholder="Enter BBCode text"></textarea>
+            <div id="render1" class="rendered"></div>
+        </div>
+    </div>
+</template>
+
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" integrity="sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script>
+
+<script src="scripts/creator.js" type="module" defer></script>
+</body>
+</html>

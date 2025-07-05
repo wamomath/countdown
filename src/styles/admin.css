@@ -87,7 +87,7 @@ aside{
     justify-content: space-between;
 }
 
-.ip{
+.id{
     font-weight: 300;
     font-size: 12px;
 }
@@ -108,4 +108,43 @@ aside{
     border: none;
     font-size: 20px;
     cursor: pointer;
+}
+
+.accept, .deny{
+    font-size: 14px;
+    padding: 0 10px;
+    background: white;
+    border: 1px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#display{
+    border: 1px solid black;
+    padding: 20px;
+    flex: 1;
+    font-family: "Computer Modern Serif", serif;
+
+}
+
+#display_wrapper{
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#display_wrapper button{
+    background: white;
+    font-size: 12px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.accept:hover{
+    background: #f0fdf4;
+}
+
+.deny:hover{
+    background: #fff1f2;
 }

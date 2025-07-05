@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/admin.css">
+    <link rel="stylesheet" href="styles/cmu.css">
     <title>Countdown Manager</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 </head>
@@ -27,30 +30,44 @@
     <aside id="devices">
         <h1>Devices Connected</h1>
         <div id="devices_wrapper">
-            <div class="user_wrapper">
-                <div class="user">
-                    <div class="device">
-                        <div class="left">
-                            <div class="head">Wesley's Laptop</div>
-                            <div class="ip">192.168.0.1</div>
-                        </div>
-                        <div class="status">CONNECTED</div>
-                    </div>
-                </div>
-                <button class="user_options"><i class="fa-solid fa-gear"></i></button>
-            </div>
-
         </div>
     </aside>
     <div id="divider"></div>
     <aside id="navigation">
+        <div id="display_wrapper">
+            <button id="move_left"><i class="fa-solid fa-angle-left"></i></button>
+            <div id="display">
+                The expression\n$$\sum_{i=0}^5 i^2 - 2^i$$\nCan be expressed as $-a$. Find $$\int_0^{a} \dfrac{x}{x+1}$$
+            </div>
+            <button id="move_right"><i class="fa-solid fa-angle-right"></i></button>
+        </div>
         <div id="controls">
             <button class="action">Upload Question Set</button>
         </div>
     </aside>
 </main>
 
+<template id="user">
+    <div class="user_wrapper pending">
+        <div class="user">
+            <div class="device">
+                <div class="left">
+                    <div class="head">Laptop</div>
+                    <div class="id">192.168.0.1</div>
+                </div>
+                <div class="status">CONNECTED</div>
+            </div>
+        </div>
+        <button class="accept"><i class="fa-solid fa-check"></i></button>
+        <button class="deny"><i class="fa-solid fa-xmark"></i></button>
+        <button class="user_options"><i class="fa-solid fa-gear"></i></button>
+    </div>
+</template>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js" integrity="sha384-cMkvdD8LoxVzGF/RPUKAcvmm49FQ0oxwDF3BGKtDXcEc+T1b2N+teh/OJfpU0jr6" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js" integrity="sha384-hCXGrW6PitJEwbkoStFjeJxv+fSOOQKOPbJxSfM6G5sWZjAyWhXiTIIAmQqnlLlh" crossorigin="anonymous"></script>
+
 <script src="/socket.io/socket.io.js"></script>
-<script src="scripts/admin.js"></script>
+<script src="scripts/admin.js" type="module" defer></script>
 </body>
 </html>

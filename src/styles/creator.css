@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+*, *::before, *::after{
+    box-sizing: border-box;
+}
+
+:root{
+    --width: min(1200px, calc(100vw - 50px));
+    --padding: calc(50vw - var(--width) / 2);
+
+    --theme: #2A6E58;
+}
+
+body{
+    font-family: Inter, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+header{
+    width: 100%;
+    background: var(--theme);
+    padding: 20px var(--padding);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+header .left{
+    color: white;
+    font-weight: 900;
+    font-size: 48px;
+}
+
+header .right{
+    text-align: right;
+}
+
+header a{
+    color: white;
+    text-decoration: none;
+}
+
+.action{
+    background: var(--theme);
+    padding: 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action:hover{
+    opacity: 0.8;
+}
+
+main{
+    width: var(--width);
+    margin: 50px auto;
+}
+
+.problem{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+}
+
+.rendered, textarea{
+    flex: 1;
+}
+
+.problem .rendered{
+    aspect-ratio: 10 / 6;
+    border: 1px solid black;
+    font-family: "Computer Modern Serif", serif;
+}
+
+textarea{
+    resize: none;
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.problem_wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.problem_wrapper .numbering{
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+    background: var(--theme);
+    color: white;
+    font-weight: bold;
+}
+
+#new{
+    margin-top: 20px;
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+    background: var(--theme);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-bottom: 20px;
+}
+
+#new:hover{
+    opacity: 0.8;
+}
+
+#wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.rendered{
+    padding: 10px;
+    overflow: auto;
+}
+
+body{
+    counter-reset: problems;
+}
+
+.problem_wrapper{
+    counter-increment: problems;
+}
+
+.numbering::after{
+    content: " " counter(problems);
+}
+
+#buttons{
+    margin-bottom: 30px;
+}

@@ -34,6 +34,10 @@ footer{
 main{
     flex: 1;
     height: 100%;
+    display: flex;
+    align-items: safe center;
+    justify-content: center;
+    background: whitesmoke;
 }
 
 footer .left{
@@ -44,4 +48,35 @@ footer .left{
 
 footer .right{
     text-align: right;
+}
+
+#waiting{
+    width: var(--width);
+    margin: 20px auto;
+    padding: 40px;
+    border: 1px solid black;
+    background: white;
+}
+
+#waiting h1{
+    margin-top: 0;
+}
+
+#rules{
+    line-height: 1.5;
+    padding: 20px;
+    background: whitesmoke;
+    border-radius: 10px;
+    overflow: auto;
+    max-height: calc(100vh - 500px);
+}
+
+#questions{
+    display: none;
+    width: min(1000px, var(--width));
+    height: 600px;
+    padding: 40px;
+    border: 1px solid black;
+    background: white;
+    font-family: "Computer Modern Serif", serif;
 }
