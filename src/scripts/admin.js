@@ -1,8 +1,26 @@
+import presetHTML5 from "https://esm.sh/@bbob/preset-html5";
+import { render } from "https://esm.sh/@bbob/html"
+import core from "https://esm.sh/@bbob/core"
+import parser from "https://esm.sh/@bbob/parser"
+
 const PARAMS = new URLSearchParams(window.location.search)
 const USERNAME = PARAMS.get("name").toUpperCase()
 const ROOM = PARAMS.get("room").toUpperCase()
 
 const socket = io();
+
+const htmlCore = core(presetHTML5())
+let questions;
+let roomData;
+
+const bbcodeRender = (code) => {
+    code = code.replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\n", "<br>")
+
+    return htmlCore.process(code, { render }).html
+}
+window.bbcodeRender=bbcodeRender
 
 socket.on("connect", () => {
     socket.emit("adminJoin", {
@@ -12,6 +30,10 @@ socket.on("connect", () => {
 })
 
 socket.on("adminJoin", (data) => {
+    document.getElementById("devices_wrapper").innerHTML = ""
+    document.getElementById("preview").innerHTML = ""
+
+    roomData = data
     for (let user in data.devices){
         join({
             room: ROOM,
@@ -20,6 +42,19 @@ socket.on("adminJoin", (data) => {
             status: data.devices[user].status
         })
     }
+    questions = data.questions
+    display(Number(data.cur))
+
+    for (let i = 0; i < questions.length; i++){
+        let element = document.createElement("DIV")
+        element.classList.add("window")
+        element.setAttribute("data-id", i)
+        document.getElementById("preview").appendChild(element)
+
+        display(i, element)
+    }
+
+    document.querySelector(`.window[data-id="${data.cur}"]`).classList.add("cur")
 })
 
 const join = (data) => {
@@ -80,10 +115,16 @@ socket.on("userDisconnect", (id) => {
     }
 })
 
-let render = (element) => {
+let renderMath = (element) => {
     renderMathInElement(element,{delimiters: [
             {left: "$$", right: "$$", display: true},
             {left: "$", right: "$", display: false}]})
 }
 
-render(document.getElementById("display"))
+const display = (num, location = document.getElementById("display")) => {
+    location.innerHTML = bbcodeRender(questions[num])
+
+    renderMath(location)
+}
+
+renderMath(document.getElementById("display"))

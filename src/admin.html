@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/admin.css">
     <link rel="stylesheet" href="styles/cmu.css">
+    <link rel="stylesheet" href="styles/p.css">
+
     <title>Countdown Manager</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
@@ -36,10 +38,14 @@
     <aside id="navigation">
         <div id="display_wrapper">
             <button id="move_left"><i class="fa-solid fa-angle-left"></i></button>
-            <div id="display">
-                The expression\n$$\sum_{i=0}^5 i^2 - 2^i$$\nCan be expressed as $-a$. Find $$\int_0^{a} \dfrac{x}{x+1}$$
+            <div id="dwrapper" class="pwrapper">
+                <div id="display" class="p">
+
+                </div>
             </div>
             <button id="move_right"><i class="fa-solid fa-angle-right"></i></button>
+        </div>
+        <div id="preview">
         </div>
         <div id="controls">
             <button class="action">Upload Question Set</button>

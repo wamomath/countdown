@@ -1,0 +1,11 @@
+.pwrapper{
+    border: 1px solid black;
+    padding: 5%;
+    font-family: "Computer Modern Serif", serif;
+    aspect-ratio: 10 / 6;
+    container-type: size;
+}
+
+.p{
+    font-size: 7cqh;
+}

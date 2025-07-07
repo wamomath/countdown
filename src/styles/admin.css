@@ -49,6 +49,12 @@ header .right{
     font-weight: bold;
     border: none;
     font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action:hover{
+    opacity: 0.8;
 }
 
 main{
@@ -120,11 +126,7 @@ aside{
 }
 
 #display{
-    border: 1px solid black;
-    padding: 20px;
     flex: 1;
-    font-family: "Computer Modern Serif", serif;
-
 }
 
 #display_wrapper{
@@ -147,4 +149,25 @@ aside{
 
 .deny:hover{
     background: #fff1f2;
+}
+
+#preview{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow: auto;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.window{
+    height: 50px;
+    min-width: 83px;
+    border: 1px solid black;
+    padding: 5px;
+    font-size: 8px;
+    overflow: hidden;
+    flex: 1;
+    font-family: "Computer Modern Serif", serif;
 }

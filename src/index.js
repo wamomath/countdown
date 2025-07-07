@@ -131,6 +131,10 @@ app.get("/styles/admin.css", (req, res) => {
     res.sendFile(__dirname + "/styles/admin.css")
 })
 
+app.get("/styles/p.css", (req, res) => {
+    res.sendFile(__dirname + "/styles/p.css")
+})
+
 app.get("/scripts/creator.js", (req, res) => {
     res.sendFile(__dirname + "/scripts/creator.js")
 })
