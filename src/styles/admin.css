@@ -125,15 +125,18 @@ aside{
     cursor: pointer;
 }
 
-#display{
+#dwrapper{
     flex: 1;
+    padding: 20px;
 }
+
 
 #display_wrapper{
     margin-bottom: 20px;
     display: flex;
     flex-direction: row;
     gap: 10px;
+    width: 100%;
 }
 
 #display_wrapper button{
@@ -162,12 +165,28 @@ aside{
 }
 
 .window{
-    height: 50px;
-    min-width: 83px;
+    height: 125px;
+    min-width: 208px;
     border: 1px solid black;
     padding: 5px;
     font-size: 8px;
     overflow: hidden;
     flex: 1;
     font-family: "Computer Modern Serif", serif;
+}
+
+.window.cur{
+    background: lightyellow;
+}
+
+#controls{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+div#devices_wrapper {
+    max-height: calc(100vh - 300px);
+    overflow: auto;
 }

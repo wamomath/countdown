@@ -42,8 +42,6 @@ socket.on("clientDeny", () => {
 socket.on("clientAccept", (data) => {
     document.getElementById("waiting").style.display = "none"
 
-
-    console.log(data)
     questions = data.questions
 
     document.getElementById("questions").style.display = "block"
@@ -51,8 +49,19 @@ socket.on("clientAccept", (data) => {
     display(Number(data.cur))
 })
 
+socket.on("clientSwitch", (data) => {
+    display(Number(data.cur))
+})
+
+socket.on("clientUpload", (data) => {
+    questions = data.code
+
+    display(Number(0))
+})
+
+
 const display = (num) => {
-    document.getElementById("questions").innerHTML = bbcodeRender(questions[num])
+    document.getElementById("questions_inner").innerHTML = bbcodeRender(questions[num])
 
     renderMath(document.getElementById("questions"))
 }
