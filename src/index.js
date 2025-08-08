@@ -12,7 +12,14 @@ let ROOMS = {
     "WAMO": {
         key: "countdown",
         devices: {},
-        questions: ["Slide 1", "Slide 2", "Slide 3"],
+        questions: [
+            {"statement": "Slide 1", "timeMS": 0},
+            {"statement": "Slide 2", "timeMS": 0}
+        ],
+        timing: {
+            start: 0,
+            duration: 0,
+        },
         cur: 0
     }
 } // Room Name : Room Key
@@ -35,6 +42,7 @@ io.on("connection", (socket) => {
     socket.on("adminJoin", (data) => {
         socket.join([data.room, data.room + "_ADMIN"])
         socket.emit("adminJoin", ROOMS[data.room])
+        socket.emit("startTimer", ROOMS[data.room].timing)
     })
 
     socket.on("disconnect", (reason) => {
@@ -56,6 +64,7 @@ io.on("connection", (socket) => {
             questions: ROOMS[room].questions,
             cur: ROOMS[room].cur
         })
+        io.to(id).emit("startTimer", ROOMS[room].timing)
 
         ROOMS[room].devices[id].status = true
     })
@@ -76,6 +85,11 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("clientSwitch", data)
         io.to(room).emit("clientSwitch", data)
+
+        ROOMS[room].timing.start = Date.now()
+        ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
+
+        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
 
     socket.on("clientUpload", (data) => {
@@ -108,7 +122,7 @@ app.get("/play", (req, res) => {
     let name = req.query.name
     let key = req.query.key
 
-    if (!ROOMS.hasOwnProperty("room")){
+    if (!ROOMS.hasOwnProperty(req.query.room)){
         res.redirect('/?err=0')
         return
     }

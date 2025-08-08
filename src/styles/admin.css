@@ -78,7 +78,7 @@ aside{
     height: 100%;
 }
 
-#devices h1{
+aside h1{
     font-size: 24px;
     margin-top: 0;
 }
@@ -189,4 +189,19 @@ aside{
 div#devices_wrapper {
     max-height: calc(100vh - 300px);
     overflow: auto;
+}
+
+#timer{
+    font-size: 18px;
+    margin-bottom: 20px;
+    border: 1px solid black;
+    padding: 20px;
+    text-align: left;
+}
+
+.device:hover{
+    text-decoration: line-through;
+    cursor: pointer;
+    color: red;
+    border-color: red;
 }

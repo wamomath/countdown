@@ -29,9 +29,14 @@
 </header>
 
 <main>
-    <aside id="devices">
-        <h1>Devices Connected</h1>
-        <div id="devices_wrapper">
+    <aside>
+        <div id="timing">
+            <h1>Game Control</h1>
+            <div id="timer">0:00:45.00</div>
+        </div>
+        <div id="devices">
+            <h1>Devices Connected</h1>
+            <div id="devices_wrapper"></div>
         </div>
     </aside>
     <div id="divider"></div>
@@ -51,6 +56,8 @@
             <button class="action" id="upload">Upload Question Set</button>
             <button class="action" id="download">Copy Question Set</button>
             <button class="action" id="uploadExample">Try Example Set (Latest AIME)</button>
+            <button class="action" id="toggleWaitingRoom">Enable Waiting Room</button>
+            <button class="action" id="openQuestionEditor">Open Question Creator</button>
         </div>
     </aside>
 </main>
@@ -68,7 +75,7 @@
         </div>
         <button class="accept"><i class="fa-solid fa-check"></i></button>
         <button class="deny"><i class="fa-solid fa-xmark"></i></button>
-        <button class="user_options"><i class="fa-solid fa-gear"></i></button>
+        <!--<button class="user_options"><i class="fa-solid fa-trash"></i></button>-->
     </div>
 </template>
 

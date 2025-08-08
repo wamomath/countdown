@@ -2,6 +2,8 @@ import presetHTML5 from "https://esm.sh/@bbob/preset-html5";
 import { render } from "https://esm.sh/@bbob/html"
 import core from "https://esm.sh/@bbob/core"
 import parser from "https://esm.sh/@bbob/parser"
+import {  } from "https://esm.sh/hacktimer"
+
 
 const PARAMS = new URLSearchParams(window.location.search)
 const USERNAME = PARAMS.get("name").toUpperCase()
@@ -12,6 +14,10 @@ const socket = io();
 let questions;
 
 const htmlCore = core(presetHTML5())
+
+let progressBarCounter = 0;
+
+let accepted = false;
 
 const bbcodeRender = (code) => {
     code = code.replaceAll("<", "&lt;")
@@ -40,28 +46,37 @@ socket.on("clientDeny", () => {
 })
 
 socket.on("clientAccept", (data) => {
+    accepted = true
     document.getElementById("waiting").style.display = "none"
 
     questions = data.questions
 
     document.getElementById("questions").style.display = "block"
+    document.getElementById("timer").style.display = "block"
 
     display(Number(data.cur))
 })
 
 socket.on("clientSwitch", (data) => {
+    if (!accepted){return}
     display(Number(data.cur))
 })
 
 socket.on("clientUpload", (data) => {
+    if (!accepted){return}
     questions = data.code
 
     display(Number(0))
 })
 
+socket.on("startTimer", (data) => {
+    if (!accepted){return}
+    setProgressBar(data.duration, Date.now() - data.start)
+})
+
 
 const display = (num) => {
-    document.getElementById("questions_inner").innerHTML = bbcodeRender(questions[num])
+    document.getElementById("questions_inner").innerHTML = bbcodeRender(questions[num].statement)
 
     renderMath(document.getElementById("questions"))
 }
@@ -71,3 +86,68 @@ const renderMath = (element) => {
             {left: "$$", right: "$$", display: true},
             {left: "$", right: "$", display: false}]})
 }
+
+const timeout = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const setProgressBar = async (durationMS, elapsedTime=0) => {
+    console.log(durationMS, elapsedTime)
+    let me = ++progressBarCounter;
+    let progressBar = document.getElementById("progress")
+    progressBar.style.backgroundColor = "#5cb85c"
+    let spacing = 25;
+    let progressBarWidth = document.getElementById("timer").scrollWidth - 10;
+    let offset = elapsedTime / durationMS * progressBarWidth;
+
+    progressBar.style.backgroundPositionX = `${offset}px`;
+
+    let iterations = (progressBarWidth - offset) / spacing;
+    progressBar.style.width = "0px";
+
+
+    let timeAlloted = (durationMS - elapsedTime) / (iterations+1);
+    let transition = Math.min(100, timeAlloted); // 2% of a second
+
+
+    console.time("PROGRESS BAR " + me)
+    let clock = performance.now()
+    let animation;
+    for (let i = 0; i <= iterations; i++){ // <= is intentional to allow the full progress bar
+        // We wish to be at iteration i at time clock + timeAlloted*(i)
+        let startTarget = clock + timeAlloted*i
+                await timeout(timeAlloted - transition)
+        if (me !== progressBarCounter){
+            console.log("NEW TIMER DETECTED. ABORTING")
+            return;
+        }
+        animation = progressBar.animate(
+            [{width: `${spacing*i + offset}px`}, {width: `${spacing*(i+1) + offset}px`}],
+            {
+                fill: "forwards",
+                duration: transition,
+                easing: "linear"
+            }
+        )
+        let endTarget = clock + timeAlloted*(i+1)
+        await timeout(Math.max(endTarget - performance.now(), 0))
+    }
+    console.timeEnd("PROGRESS BAR " + me)
+
+    if (animation){
+        animation.cancel()
+    }
+    progressBar.animate(
+        [{width: `0px`}, {width: progressBarWidth+"px"}],
+        {
+            fill: "forwards",
+            duration: 0,
+            easing: "linear"
+        }
+    )
+
+    progressBar.style.backgroundColor = "#d9534f"
+}
+
+
+window.setProgressBar = setProgressBar
