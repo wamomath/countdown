@@ -228,6 +228,10 @@ document.getElementById("toggleWaitingRoom").onclick = () => {
     document.getElementById("toggleWaitingRoom").innerHTML = `${['Enable', 'Disable'][Number(waitingRoom)]} Waiting Room`
 }
 
+document.getElementById("openQuestionEditor").onclick = () => {
+    open(`/creator?data=${encodeURIComponent(JSON.stringify(questions))}`)
+}
+
 const prepWindows = () => {
     document.getElementById("preview").scrollTo(228*cur,0)
 
@@ -295,10 +299,13 @@ const startTimer = (duration, start) => {
 
     clearInterval(timerInterval)
 
+    document.getElementById("timer").style.background = "#d1fae5"
+
     timerInterval = setInterval(() => {
         document.getElementById("timer").innerText = (Math.max(0, target - Date.now())/1000).toFixed(2)
 
         if (target < Date.now()){
+            document.getElementById("timer").style.background = "#fff1f2"
             clearInterval(timerInterval)
         }
     }, 10)

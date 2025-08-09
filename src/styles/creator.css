@@ -147,3 +147,10 @@ body{
 #buttons{
     margin-bottom: 30px;
 }
+
+.additional{
+    padding: 10px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: space-between;
+}

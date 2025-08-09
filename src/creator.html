@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles/cmu.css">
     <title>Countdown Manager</title>
 
+    <link id="favicon" rel="icon" href="assets/alarmgreen.svg">
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -37,7 +39,8 @@
 
 <template id="problem_template">
     <div class="problem_wrapper">
-        <div class="numbering"><input data-id="1" value="45000" type="number"> SLIDE</div>
+        <div class="numbering">SLIDE</div>
+        <div class="additional"><div><input data-id="1" value="45000" type="number"> PROBLEM TIME (IN MILLISECONDS)</div> <button><i class="fa-solid fa-trash"></i> DELETE PROBLEM</button></div>
         <div class="problem">
             <textarea data-id="1" placeholder="Enter BBCode text"></textarea>
             <div id="render1" class="rendered"></div>

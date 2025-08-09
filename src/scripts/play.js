@@ -92,13 +92,24 @@ const timeout = (ms) => {
 }
 
 const setProgressBar = async (durationMS, elapsedTime=0) => {
-    console.log(durationMS, elapsedTime)
     let me = ++progressBarCounter;
     let progressBar = document.getElementById("progress")
+
+    progressBar.animate(
+        [{width: `0px`}, {width: "0px"}],
+        {
+            fill: "forwards",
+            duration: 0,
+            easing: "linear"
+        }
+    )
+
     progressBar.style.backgroundColor = "#5cb85c"
     let spacing = 25;
     let progressBarWidth = document.getElementById("timer").scrollWidth - 10;
     let offset = elapsedTime / durationMS * progressBarWidth;
+
+    document.getElementById("favicon").href = "/assets/alarmgreen.svg"
 
     progressBar.style.backgroundPositionX = `${offset}px`;
 
@@ -147,6 +158,7 @@ const setProgressBar = async (durationMS, elapsedTime=0) => {
     )
 
     progressBar.style.backgroundColor = "#d9534f"
+    document.getElementById("favicon").href = "/assets/alarmred.svg"
 }
 
 

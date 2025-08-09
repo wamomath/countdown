@@ -101,6 +101,11 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("adminJoin", ROOMS[room])
         io.to(room).emit("clientUpload", data)
+
+        ROOMS[room].timing.start = Date.now()
+        ROOMS[room].timing.duration = ROOMS[room].questions[0].timeMS
+
+        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
 });
 
@@ -172,6 +177,14 @@ app.get("/styles/p.css", (req, res) => {
 
 app.get("/scripts/creator.js", (req, res) => {
     res.sendFile(__dirname + "/scripts/creator.js")
+})
+
+app.get("/assets/alarmred.svg", (req, res) => {
+    res.sendFile(__dirname + "/assets/alarmred.svg")
+})
+
+app.get("/assets/alarmgreen.svg", (req, res) => {
+    res.sendFile(__dirname + "/assets/alarmgreen.svg")
 })
 
 app.get("/styles/creator.css", (req, res) => {
