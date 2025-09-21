@@ -80,8 +80,8 @@ socket.on("startTimer", (data) => {
 socket.on("updateNames", (data) => {
     console.log("received")
     if (!accepted){return}
-    document.getElementById("leftvsbar").innerHTML = data.competitor1
-    document.getElementById("rightvsbar").innerHTML = data.competitor2
+    document.getElementById("leftvsbar").innerHTML = `[${data.c1seed}] ${data.competitor1}`
+    document.getElementById("rightvsbar").innerHTML = `${data.competitor2} [${data.c2seed}]`
 })
 
 //socket updates scores and displays them

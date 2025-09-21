@@ -205,3 +205,22 @@ div#devices_wrapper {
     color: red;
     border-color: red;
 }
+
+
+.cnameinput {
+    width: 85%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.cseedinput {
+    width: 14%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}

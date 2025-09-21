@@ -14,8 +14,6 @@ let questions;
 let roomData;
 let cur;
 let waitingRoom = false;
-let c1;
-let c2;
 
 const bbcodeRender = (code) => {
     code = code.replaceAll("<", "&lt;")
@@ -241,14 +239,13 @@ document.getElementById("updateNames").onclick = () => {
     if (!confirm("Are you sure these updated names are correct?")){
         return;
     }
-    c1 = document.getElementById("competitor1").value
-    c2 = document.getElementById("competitor2").value
     socket.emit("updateNames", {
         room: ROOM,
-        competitor1: c1,
-        competitor2: c2
+        competitor1: document.getElementById("competitor1").value,
+        competitor2: document.getElementById("competitor2").value,
+        c1seed: document.getElementById("c1seed").value,
+        c2seed: document.getElementById("c2seed").value,
     })
-    console.log(ROOM,c1,c2)
 }
 
 //debugging
