@@ -14,6 +14,8 @@ let questions;
 let roomData;
 let cur;
 let waitingRoom = false;
+let c1;
+let c2;
 
 const bbcodeRender = (code) => {
     code = code.replaceAll("<", "&lt;")
@@ -34,6 +36,8 @@ socket.on("connect", () => {
 socket.on("adminJoin", (data) => {
     document.getElementById("devices_wrapper").innerHTML = ""
     document.getElementById("preview").innerHTML = ""
+    document.getElementById("status").innerHTML = `ID: ${socket.id}`
+    document.getElementById("name").innerHTML = `REGISTERED AS ${USERNAME}`
 
     prepQuestions(data)
 
@@ -94,7 +98,7 @@ const join = (data) => {
 socket.on("clientJoin", join)
 
 socket.on("clientAccept", (data) => {
-    document.querySelector(`.user_wrapper[data-id="${data.id}"]`).classList.remove("pending")
+    try{document.querySelector(`.user_wrapper[data-id="${data.id}"]`).classList.remove("pending")}catch{}
     let a = document.querySelector(`.accept[data-id="${data.id}"]`);
     let b = document.querySelector(`.deny[data-id="${data.id}"]`);
     if (a){
@@ -214,7 +218,7 @@ document.getElementById("uploadExample").onclick= () => {
             {statement: "==Problem 13==  \n\nAlex divides a disk into four quadrants with two perpendicular diameters intersecting at the center of the disk. He draws $25$ more line segments through the disk, drawing each segment by selecting two points at random on the perimeter of the disk in different quadrants and connecting these two points. Find the expected number of regions into which these $27$ line segments divide the disk.", timeMS: 10000},
             {statement: "==Problem 14==  \n\nLet $ABCDE$ be a convex pentagon with $AB=14,$ $BC=7,$ $CD=24,$ $DE=13,$ $EA=26,$ and $\\angle B=\\angle E=60^{\\circ}.$ For each point $X$ in the plane, define $f(X)=AX+BX+CX+DX+EX.$ The least possible value of $f(X)$ can be expressed as $m+n\\sqrt{p},$ where $m$ and $n$ are positive integers and $p$ is not divisible by the square of any prime. Find $m+n+p.$", timeMS: 10000},
             {statement: "==Problem 15==  \n\nLet $N$ denote the number of ordered triples of positive integers $(a, b, c)$ such that $a, b, c \\leq 3^6$ and $a^3 + b^3 + c^3$ is a multiple of $3^7$. Find the remainder when $N$ is divided by $1000$.\n", timeMS: 10000}
-        ],
+        ],//extra comma?
     })
 }
 
@@ -231,6 +235,26 @@ document.getElementById("toggleWaitingRoom").onclick = () => {
 document.getElementById("openQuestionEditor").onclick = () => {
     open(`/creator?data=${encodeURIComponent(JSON.stringify(questions))}`)
 }
+
+//update competitor names
+document.getElementById("updateNames").onclick = () => {
+    if (!confirm("Are you sure these updated names are correct?")){
+        return;
+    }
+    c1 = document.getElementById("competitor1").value
+    c2 = document.getElementById("competitor2").value
+    socket.emit("updateNames", {
+        room: ROOM,
+        competitor1: c1,
+        competitor2: c2
+    })
+    console.log(ROOM,c1,c2)
+}
+
+//debugging
+socket.on("updateNames", (data) => {
+    console.log(data.competitor1, data.competitor2)
+})
 
 const prepWindows = () => {
     document.getElementById("preview").scrollTo(228*cur,0)

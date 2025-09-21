@@ -107,6 +107,12 @@ io.on("connection", (socket) => {
 
         io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
+
+    socket.on("updateNames", (data) => {
+        let room = data.room
+
+        io.to(room).emit("updateNames", data)
+    })
 });
 
 

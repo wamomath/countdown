@@ -1,7 +1,7 @@
 .pwrapper{
     border: 1px solid black;
     /*font-family: "Computer Modern Serif", serif;*/
-    aspect-ratio: 10 / 6;
+    aspect-ratio: 10 / 5;
     container-type: size;
 }
 

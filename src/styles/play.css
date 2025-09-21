@@ -76,7 +76,7 @@ footer .right{
 #questions{
     display: none;
     width: min(1000px, var(--width));
-    height: 600px;
+    height: 500px;
     padding: 40px;
     border: 1px solid black;
     background: white;
@@ -117,4 +117,25 @@ footer .right{
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+#vsbar {
+    display: none;
+    position: relative;
+    width: min(1000px, var(--width));
+    padding: 10px;
+    border: 1px solid black;
+    background: white;
+    font-size: 36px;
+    text-align: center;
+}
+
+#leftvsbar {
+    position: absolute;
+    left: 10px;
+}
+
+#rightvsbar {
+    position: absolute;
+    right: 10px;
 }

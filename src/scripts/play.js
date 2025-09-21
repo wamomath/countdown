@@ -53,6 +53,7 @@ socket.on("clientAccept", (data) => {
 
     document.getElementById("questions").style.display = "block"
     document.getElementById("timer").style.display = "block"
+    document.getElementById("vsbar").style.display = "block"
 
     display(Number(data.cur))
 })
@@ -72,6 +73,21 @@ socket.on("clientUpload", (data) => {
 socket.on("startTimer", (data) => {
     if (!accepted){return}
     setProgressBar(data.duration, Date.now() - data.start)
+})
+
+
+//socket updates names and displays them
+socket.on("updateNames", (data) => {
+    console.log("received")
+    if (!accepted){return}
+    document.getElementById("leftvsbar").innerHTML = data.competitor1
+    document.getElementById("rightvsbar").innerHTML = data.competitor2
+})
+
+//socket updates scores and displays them
+socket.on("updateScores", (data) => {
+    if (!accepted){return}
+    document.getElementById("leftvsbar").innerText += " " + data.score1 //havent coded this in yet--it is supposed to be three vertical bars shaded red; when someone gets a point the next vertical bar gets shaded
 })
 
 
