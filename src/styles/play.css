@@ -106,3 +106,15 @@ footer .right{
 
     border-radius: 4px;
 }
+
+#fullscreenbutton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #00000080;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}

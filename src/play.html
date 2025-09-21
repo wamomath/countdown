@@ -10,26 +10,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" integrity="sha384-5TcZemv2l/9On385z///+d7MSYlvIEw9FuZTIdZ14vJLqWphw7e7ZPuOiCHJcFCP" crossorigin="anonymous">
 
     <link id="favicon" rel="icon" href="assets/alarmgreen.svg">
-
+    
     <title>Countdown Player</title>
 </head>
 <body>
     <main>
         <div id="waiting">
-            <h1 class="header">Please wait for the host to grant you access</h1>
-            <p>Take this moment to review the rules</p>
+            <h1 class="header">Please wait for the host to grant you access.</h1>
+            <p>Please take this time to familiarize yourself with the rules.</p>
+            <button id="fullscreenbutton" onclick="document.documentElement.requestFullscreen();this.style.display='none'">Enter fullscreen</button>
             <div id="rules">
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras volutpat, urna eget finibus laoreet, erat nunc dignissim nunc, a accumsan orci ligula vel velit. Phasellus hendrerit sem eu enim tincidunt, ac lacinia turpis tempus. Suspendisse ac venenatis odio. Donec ac hendrerit mauris, quis fringilla purus. Nunc mattis nisl a augue pulvinar, id aliquam nulla lobortis. Quisque maximus euismod purus, non efficitur sapien congue consectetur. Phasellus tellus libero, tempor ac convallis a, aliquet at lectus. Donec vulputate leo sed tincidunt mattis. Ut et lorem et turpis ullamcorper pellentesque. Mauris non hendrerit magna. In hac habitasse platea dictumst. Donec et sem condimentum, semper nibh in, posuere velit. Sed a nulla leo.
-
-                Quisque semper consectetur tempus. Etiam vel eros nec sapien bibendum commodo et quis lorem. Aliquam sit amet leo porttitor, tristique sem eu, placerat leo. Mauris vehicula tortor quam, vel tempus nunc finibus at. Vivamus quis turpis suscipit nisi faucibus accumsan. Aliquam malesuada elit vel nunc pretium, sed consequat urna luctus. Suspendisse ornare eros massa, sed bibendum enim convallis in. Cras congue neque et ligula facilisis, vitae fringilla nulla eleifend. Mauris felis magna, feugiat id nulla eu, egestas mattis enim.
-
-                In eleifend velit quis massa aliquam cursus. Aliquam erat volutpat. Curabitur placerat nibh a justo ultrices ultricies. Duis gravida enim et ipsum fringilla, sed pulvinar turpis vulputate. Morbi pharetra nisi et vestibulum varius. Quisque ullamcorper mi eu sapien maximus, lobortis luctus massa luctus. Nullam dictum orci nec semper tristique. Aenean laoreet ante id posuere fermentum. Duis laoreet non velit in maximus. Aenean ultricies nec augue sit amet rhoncus.
-
-                Nullam bibendum eget neque finibus viverra. Mauris libero risus, bibendum non sagittis sed, vestibulum vitae mauris. Vestibulum eu faucibus lorem, ut rhoncus dui. In hac habitasse platea dictumst. Etiam vitae tempus purus. Vestibulum aliquet mauris non odio sodales, ut malesuada dolor condimentum. Pellentesque ac purus in libero tristique vestibulum. Morbi nec lacinia risus. Vestibulum sit amet nibh condimentum, imperdiet tortor sit amet, sagittis erat. Aenean aliquam elit et odio pellentesque rutrum. Donec a lacus sodales, cursus purus mattis, congue arcu. Morbi aliquet laoreet arcu nec blandit. Maecenas ultrices neque sapien, quis hendrerit dui viverra id. Nullam vitae rhoncus dolor, sed interdum justo. Nunc tincidunt consequat sapien in finibus. Aenean vitae blandit dolor.
-
-                Aenean risus libero, tincidunt sed elit nec, elementum dictum tortor. Donec porttitor lorem placerat, dictum sapien et, luctus velit. Nunc id urna sollicitudin, lacinia lectus vitae, interdum massa. Sed rhoncus, purus a egestas feugiat, mauris diam dignissim odio, id porta nunc enim eget enim. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Praesent pharetra eget nulla id tincidunt. Sed aliquet scelerisque sapien, ac laoreet odio porttitor vel. Duis feugiat, odio quis tempor mollis, mauris leo porttitor est, quis lobortis dui enim vitae nisi.
-
-
+                Welcome to the WAMT Countdown Round! Twelve students will compete in a single-elimination bracket. Players are seeded based on their written round rankings. The top four written round scorers will receive a bye in the first round, meaning that they automatically move to the second round. The remaining competitors will face off in the first round, with 5th against 12th, 6th against 11th, and so on. Questions will be read aloud by the moderator and displayed on both contestants' screens and the large screen up front. Either student may buzz in at any time, even before the moderator finishes reading. After buzzing in, the student will have 3 seconds to begin their answer or lose their chance to answer that question. If the student answers incorrectly, the other contestant will have the remainder of the question read to them and will have the remainder of the time limit to answer.<br>
+                The first student to answer three questions correctly wins the match and advances to the next round. Players have 45 seconds to answer each question, including the time the moderator spends reading the question. If no one buzzes within that time, nobody gets the point. In the event of a 2–2 tie, the match will proceed to sudden victory, where the next person to answer a question will win the match. Matches will continue until a final champion is determined.<br>
+                Judges will determine the correctness of all answers. Please remain silent during matches to avoid disturbing the contestants.
             </div>
         </div>
         <div id="timer"><div id="progress"></div></div>
