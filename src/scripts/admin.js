@@ -14,6 +14,8 @@ let questions;
 let roomData;
 let cur;
 let waitingRoom = false;
+let curp1score = 0;
+let curp2score = 0;
 
 const bbcodeRender = (code) => {
     code = code.replaceAll("<", "&lt;")
@@ -246,12 +248,62 @@ document.getElementById("updateNames").onclick = () => {
         c1seed: document.getElementById("c1seed").value,
         c2seed: document.getElementById("c2seed").value,
     })
+    document.getElementById("p1name").innerHTML =
+        `[${document.getElementById("c1seed").value}] ${document.getElementById("competitor1").value}`;
+    document.getElementById("p2name").innerHTML =
+        `${document.getElementById("competitor2").value} [${document.getElementById("c2seed").value}]`;
 }
 
-//debugging
-socket.on("updateNames", (data) => {
-    console.log(data.competitor1, data.competitor2)
-})
+//player 1 scores
+document.getElementById("player1score").onclick = () => {
+    if (!confirm("Are you sure Player 1 has just scored a point?")){
+        return;
+    }
+    socket.emit("updateScores", {
+        room: ROOM,
+        playernum: 1
+    })
+    curp1score = curp1score + 1;
+    document.getElementById(`bar1${curp1score}`).style.backgroundColor =
+        "#5cb85c";
+    document.getElementById(`bar1${curp1score}`).style.color = "#5cb85c";
+}
+//player 2 scores
+document.getElementById("player2score").onclick = () => {
+    if (!confirm("Are you sure Player 2 has just scored a point?")){
+        return;
+    }
+    socket.emit("updateScores", {
+        room: ROOM,
+        playernum: 2
+    })
+    curp2score = curp2score + 1;
+    document.getElementById(`bar2${curp2score}`).style.backgroundColor =
+        "#5cb85c";
+    document.getElementById(`bar2${curp2score}`).style.color = "#5cb85c";
+}
+
+//scores are reset
+document.getElementById("resetscores").onclick = () => {
+    if (!confirm("Are you sure the match is over?")){
+        return;
+    }
+    socket.emit("resetScores", {
+        room: ROOM
+    })
+    document.getElementById("bar11").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar12").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar13").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar21").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar22").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar23").style.backgroundColor = "rgb(217, 83, 79)";
+    document.getElementById("bar11").style.color = "rgb(217, 83, 79)";
+    document.getElementById("bar12").style.color = "rgb(217, 83, 79)";
+    document.getElementById("bar13").style.color = "rgb(217, 83, 79)";
+    document.getElementById("bar21").style.color = "rgb(217, 83, 79)";
+    document.getElementById("bar22").style.color = "rgb(217, 83, 79)";
+    document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
+}
 
 const prepWindows = () => {
     document.getElementById("preview").scrollTo(228*cur,0)

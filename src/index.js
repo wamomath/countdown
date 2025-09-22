@@ -113,6 +113,18 @@ io.on("connection", (socket) => {
 
         io.to(room).emit("updateNames", data)
     })
+
+    socket.on("updateScores", (data) => {
+        let room = data.room
+
+        io.to(room).emit("updateScores", data)
+    })
+
+    socket.on("resetScores", (data) => {
+        let room = data.room
+
+        io.to(room).emit("resetScores", data)
+    })
 });
 
 

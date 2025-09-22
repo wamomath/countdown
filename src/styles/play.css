@@ -1,17 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-*, *::before, *::after{
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
-:root{
+:root {
     --width: min(1200px, calc(100vw - 50px));
     --padding: calc(50vw - var(--width) / 2);
 
     --theme: #2A6E58;
 }
 
-body{
+body {
     font-family: Inter, sans-serif;
     margin: 0;
     display: flex;
@@ -19,7 +21,7 @@ body{
     height: 100vh;
 }
 
-footer{
+footer {
     width: 100%;
     background: var(--theme);
     padding: 20px 40px;
@@ -31,7 +33,7 @@ footer{
     flex-wrap: wrap;
 }
 
-main{
+main {
     flex: 1;
     height: 100%;
     display: flex;
@@ -42,17 +44,17 @@ main{
     gap: 10px;
 }
 
-footer .left{
+footer .left {
     color: white;
     font-weight: 900;
     font-size: 48px;
 }
 
-footer .right{
+footer .right {
     text-align: right;
 }
 
-#waiting{
+#waiting {
     width: var(--width);
     margin: 20px auto;
     padding: 40px;
@@ -60,11 +62,11 @@ footer .right{
     background: white;
 }
 
-#waiting h1{
+#waiting h1 {
     margin-top: 0;
 }
 
-#rules{
+#rules {
     line-height: 1.5;
     padding: 20px;
     background: whitesmoke;
@@ -73,7 +75,7 @@ footer .right{
     max-height: calc(100vh - 500px);
 }
 
-#questions{
+#questions {
     display: none;
     width: min(1000px, var(--width));
     height: 500px;
@@ -83,7 +85,7 @@ footer .right{
     overflow: auto;
 }
 
-#timer{
+#timer {
     background: #020617;
     width: min(1000px, var(--width));
     padding: 5px;
@@ -92,15 +94,15 @@ footer .right{
     overflow: hidden;
 }
 
-#progress{
+#progress {
     height: 25px;
     width: 0;
 
     background: #5cb85c;
     background-size: 25px 25px;
     background-repeat: repeat-x;
-    background-image: linear-gradient(135deg,rgba(2,6,23,1) 25%,transparent 25%,
-    transparent 50%,rgba(2,6,23,1) 50%,rgba(2,6,23,1) 75%,transparent 75%,transparent);
+    background-image: linear-gradient(135deg, rgba(2, 6, 23, 1) 25%, transparent 25%,
+            transparent 50%, rgba(2, 6, 23, 1) 50%, rgba(2, 6, 23, 1) 75%, transparent 75%, transparent);
 
     clip-path: polygon(0% 0%, 100% 0%, calc(100% - 20px) 100%, 0% 1000%);
 
@@ -120,22 +122,57 @@ footer .right{
 }
 
 #vsbar {
-    display: none;
-    position: relative;
     width: min(1000px, var(--width));
     padding: 10px;
     border: 1px solid black;
     background: white;
-    font-size: 36px;
+    font-size: 18px;
     text-align: center;
+
+    display: none;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
 }
 
-#leftvsbar {
-    position: absolute;
-    left: 10px;
+
+#middlevsbar {
+    position: relative;
+    overflow: hidden;
 }
 
-#rightvsbar {
-    position: absolute;
-    right: 10px;
+.competitor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px;
+    gap: 5px;
+    font-size: 24px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.competitor.left {
+    text-align: left;
+}
+
+.competitor.right {
+    text-align: right;
+}
+
+.competitor_bars {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.bar {
+    display: inline-block;
+    background-color: rgb(217, 83, 79);
+    color: rgb(217, 83, 79);
+    /*border: 5px solid black;*/
+    cursor: default;
+    width: 100px;
+    height: 10px;
+    flex: 1;
 }

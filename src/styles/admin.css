@@ -224,3 +224,77 @@ div#devices_wrapper {
     border-radius: 4px;
     box-sizing: border-box;
 }
+
+#scores{
+    font-size: 18px;
+    margin-bottom: 20px;
+    border: 1px solid black;
+    padding: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+#p1score {
+    text-align: left;
+    display: inline-block;
+}
+
+#p2score {
+    text-align: right;
+    display: inline-block;
+}
+
+#vsbar {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid black;
+    background: white;
+    font-size: 18px;
+    text-align: center;
+    
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+}
+
+
+#middlevsbar {
+    position: relative;
+    overflow: hidden;
+}
+
+.competitor {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 10px;
+    gap: 5px;
+    font-size: 24px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.competitor.left {
+    text-align: left;
+}
+
+.competitor.right {
+    text-align: right;
+}
+
+.competitor_bars {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.bar {
+    display: inline-block;
+    background-color: rgb(217, 83, 79);
+    color: rgb(217, 83, 79);
+    /*border: 5px solid black;*/
+    cursor: default;
+    width: 100px;
+    height: 10px;
+    flex: 1;
+}

@@ -32,7 +32,7 @@
 
 <main>
     <aside>
-        <div id="timing">
+        <div id="gamecontrol">
             <h1>Game Control</h1>
             <div id="competitors">
                 <input id="competitor1" placeholder="Competitor 1" class="cnameinput">
@@ -68,6 +68,30 @@
                 </select>
                 <br>
                 <button class="action" id="updateNames">Update Names</button>
+                <button class="action" id="player1score">Add 1 to Player 1</button>
+                <button class="action" id="player2score">Add 1 to Player 2</button>
+                <button class="action" id="resetscores">Reset Scores</button>
+            </div>
+            <br>
+            <div id="vsbar">
+                <div class="competitor left">
+                    <div class="competitior_name" id="p1name">Set competitor names</div>
+                    <div class="competitor_bars">
+                        <div class="bar bar1" id="bar11"></div>
+                        <div class="bar bar1" id="bar12"></div>
+                        <div class="bar bar1" id="bar13"></div>
+                    </div>
+                </div>
+                <div class="middle">VS.</div>
+
+                <div class="competitor right">
+                    <div class="competitior_name" id="p2name">Set competitor names</div>
+                    <div class="competitor_bars">
+                        <div class="bar bar1" id="bar23"></div>
+                        <div class="bar bar1" id="bar22"></div>
+                        <div class="bar bar1" id="bar21"></div>
+                    </div>
+                </div>
             </div>
             <br>
             <div id="timer">0:00:45.00</div>
