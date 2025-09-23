@@ -133,6 +133,14 @@ socket.on("resetScores", (data) => {
     document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
 });
 
+//keydown for the buzzers
+document.addEventListener('keydown', function(event) {
+    console.log('Key pressed:', event.key);//google ai
+    if (event.key === '1'){
+        document.getElementById("main").style.backgroundColor = "rgb(217, 83, 79) !important";
+    }
+});
+
 const display = (num) => {
     document.getElementById("questions_inner").innerHTML = bbcodeRender(
         questions[num].statement,
