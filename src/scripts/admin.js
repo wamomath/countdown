@@ -75,6 +75,8 @@ const join = (data) => {
 
             let a = document.querySelector(`.accept[data-id="${data.id}"]`);
             let b = document.querySelector(`.deny[data-id="${data.id}"]`);
+            console.log(a);
+            console.log(b)
             a.remove();
             b.remove();
         }
@@ -120,10 +122,8 @@ socket.on("userDisconnect", (id) => {
     if (document.getElementById(`USER_${id}`)){
         document.getElementById(`USER_${id}`).remove()
     }
-    elementtemp = document.getElementById(`${id}1`)
-    elementtemp.parentNode.removeChild(elementtemp)
-    elementtemp = document.getElementById(`${id}2`)
-    elementtemp.parentNode.removeChild(elementtemp)
+    document.getElementById(`${id}1`).remove();
+    document.getElementById(`${id}2`).remove();
 })
 
 let renderMath = (element) => {
@@ -175,6 +175,15 @@ socket.on("clientSwitch", (data) => {
 
 socket.on("startTimer", (data) => {
     startTimer(data.duration, data.start)
+})
+
+//upon buzz shade buzzing side
+socket.on("buzz", (data) => {
+    if (data.playernum == 1){
+        document.getElementById("p1").style.backgroundColor = "lightgreen";
+    } else if (data.playernum == 2){
+        document.getElementById("p1").style.backgroundColor = "lightgreen";
+    }
 })
 
 document.getElementById("upload").onclick = () => {

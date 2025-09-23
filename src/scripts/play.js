@@ -147,13 +147,30 @@ socket.on("assignCompetitors", (data) => {
     }
 })
 
+//upon buzz shade buzzing side
+socket.on("buzz", (data) => {
+    if (data.playernum == 1){
+        document.getElementById("p1").style.backgroundColor = "lightgreen";
+    } else if (data.playernum == 2){
+        document.getElementById("p1").style.backgroundColor = "lightgreen";
+    }
+})
+
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
     //console.log('Key pressed:', event.key);
     if (event.key === ' ' && competitor1){
         document.getElementById("p1").style.backgroundColor = "lightgreen";
+        socket.emit("buzz", {
+            room: ROOM,
+            playernum: 1
+        })
     } else if (event.key === ' ' && competitor2){
         document.getElementById("p2").style.backgroundColor = "lightgreen";
+        socket.emit("buzz", {
+            room: ROOM,
+            playernum: 2
+        })
     }
 });
 
