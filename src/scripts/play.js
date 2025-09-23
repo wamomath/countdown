@@ -21,6 +21,9 @@ let accepted = false;
 let curp1score = 0;
 let curp2score = 0;
 
+let competitor1 = false;
+let competitor2 = false;
+
 const bbcodeRender = (code) => {
     code = code
         .replaceAll("<", "&lt;")
@@ -133,11 +136,24 @@ socket.on("resetScores", (data) => {
     document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
 });
 
+//socket checks if c1 or c2 is correct
+socket.on("assignCompetitors", (data) => {
+    competitor1 = false;
+    competitor2 = false;
+    if (data.c1link == socket.id) {
+        competitor1 = true;
+    } else if (data.c2link == socket.id) {
+        competitor2 = true;
+    }
+})
+
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
-    console.log('Key pressed:', event.key);//google ai
-    if (event.key === '1'){
-        document.getElementById("main").style.backgroundColor = "rgb(217, 83, 79) !important";
+    //console.log('Key pressed:', event.key);
+    if (event.key === ' ' && competitor1){
+        document.getElementById("p1").style.backgroundColor = "lightgreen";
+    } else if (event.key === ' ' && competitor2){
+        document.getElementById("p2").style.backgroundColor = "lightgreen";
     }
 });
 

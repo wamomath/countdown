@@ -125,6 +125,12 @@ io.on("connection", (socket) => {
 
         io.to(room).emit("resetScores", data)
     })
+
+    socket.on("assignCompetitors", (data) => {
+        let room = data.room
+
+        io.to(room).emit("assignCompetitors", data)
+    })
 });
 
 

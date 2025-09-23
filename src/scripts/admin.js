@@ -16,6 +16,7 @@ let cur;
 let waitingRoom = false;
 let curp1score = 0;
 let curp2score = 0;
+let elementtemp = "";
 
 const bbcodeRender = (code) => {
     code = code.replaceAll("<", "&lt;")
@@ -93,6 +94,8 @@ const join = (data) => {
         }
     }
 
+    document.getElementById("c1link").innerHTML += `<option value="${data.id}" id="${data.id}1">${data.id}</option>`;
+    document.getElementById("c2link").innerHTML += `<option value="${data.id}" id="${data.id}2">${data.id}</option>`;
 }
 
 socket.on("clientJoin", join)
@@ -117,6 +120,10 @@ socket.on("userDisconnect", (id) => {
     if (document.getElementById(`USER_${id}`)){
         document.getElementById(`USER_${id}`).remove()
     }
+    elementtemp = document.getElementById(`${id}1`)
+    elementtemp.parentNode.removeChild(elementtemp)
+    elementtemp = document.getElementById(`${id}2`)
+    elementtemp.parentNode.removeChild(elementtemp)
 })
 
 let renderMath = (element) => {
@@ -303,6 +310,26 @@ document.getElementById("resetscores").onclick = () => {
     document.getElementById("bar21").style.color = "rgb(217, 83, 79)";
     document.getElementById("bar22").style.color = "rgb(217, 83, 79)";
     document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
+}
+
+//competitor computers are set
+document.getElementById("clinkset").onclick = () => {
+    if (!confirm("Are you sure you are assigning the competitors to the right computers?")){
+        return;
+    }
+    let c1link = document.getElementById("c1link").value;
+    let c2link = document.getElementById("c2link").value;
+    if (c1link == "none" || c2link == "none"){
+        alert("Please assign computers to both fields.")
+    } else if (c1link === c2link) {
+        alert("Please assign different computers to each competitor.")
+    } else {
+        socket.emit("assignCompetitors", {
+            room: ROOM,
+            c1link: c1link,
+            c2link: c2link
+        })
+    }
 }
 
 const prepWindows = () => {

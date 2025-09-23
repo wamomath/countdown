@@ -298,3 +298,12 @@ div#devices_wrapper {
     height: 10px;
     flex: 1;
 }
+
+.clink {
+    width: 27%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
