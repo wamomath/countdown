@@ -182,7 +182,7 @@ socket.on("buzz", (data) => {
     if (data.playernum == 1){
         document.getElementById("p1").style.backgroundColor = "lightgreen";
     } else if (data.playernum == 2){
-        document.getElementById("p1").style.backgroundColor = "lightgreen";
+        document.getElementById("p2").style.backgroundColor = "lightgreen";
     }
 })
 
