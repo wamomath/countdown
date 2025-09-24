@@ -24,6 +24,8 @@ let curp2score = 0;
 let competitor1 = false;
 let competitor2 = false;
 
+let hasbuzzed = true;
+
 const bbcodeRender = (code) => {
     code = code
         .replaceAll("<", "&lt;")
@@ -69,6 +71,7 @@ socket.on("clientSwitch", (data) => {
         return;
     }
     display(Number(data.cur));
+    hasbuzzed = false;
 });
 
 socket.on("clientUpload", (data) => {
@@ -152,25 +155,32 @@ socket.on("buzz", (data) => {
     if (data.playernum == 1){
         document.getElementById("p1").style.backgroundColor = "lightgreen";
     } else if (data.playernum == 2){
-        document.getElementById("p1").style.backgroundColor = "lightgreen";
+        document.getElementById("p2").style.backgroundColor = "lightgreen";
     }
+})
+
+//clearbuzz removes the buzz
+socket.on("clearbuzz", (data) =>{
+    document.getElementById("p1").style.backgroundColor = "white";
+    document.getElementById("p2").style.backgroundColor = "white";
 })
 
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
-    //console.log('Key pressed:', event.key);
-    if (event.key === ' ' && competitor1){
+    if (event.key === ' ' && competitor1 && !hasbuzzed){
         document.getElementById("p1").style.backgroundColor = "lightgreen";
         socket.emit("buzz", {
             room: ROOM,
             playernum: 1
         })
-    } else if (event.key === ' ' && competitor2){
+        hasbuzzed = true
+    } else if (event.key === ' ' && competitor2 && !hasbuzzed){
         document.getElementById("p2").style.backgroundColor = "lightgreen";
         socket.emit("buzz", {
             room: ROOM,
             playernum: 2
         })
+        hasbuzzed = true
     }
 });
 
@@ -262,6 +272,7 @@ const setProgressBar = async (durationMS, elapsedTime = 0) => {
 
     progressBar.style.backgroundColor = "#d9534f";
     document.getElementById("favicon").href = "/assets/alarmred.svg";
+    hasbuzzed = true;
 };
 
 window.setProgressBar = setProgressBar;

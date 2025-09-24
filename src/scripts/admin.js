@@ -341,6 +341,13 @@ document.getElementById("clinkset").onclick = () => {
     }
 }
 
+//clears buzz
+document.getElementById("clearBuzz").onclick = () => {
+    document.getElementById("p1").style.backgroundColor = "white";
+    document.getElementById("p2").style.backgroundColor = "white";
+    socket.emit("clearbuzz", {room: ROOM})
+}
+
 const prepWindows = () => {
     document.getElementById("preview").scrollTo(228*cur,0)
 
