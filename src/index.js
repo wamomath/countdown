@@ -139,7 +139,6 @@ io.on("connection", (socket) => {
         let room = data.room
 
         ROOMS[room].timing.elapsed = ROOMS[room].timing.elapsed + Date.now() - ROOMS[room].timing.start
-        console.log(ROOMS[room].timing.elapsed)
 
         io.to(room).emit("pauseTimer", data)
     })
@@ -160,6 +159,16 @@ io.on("connection", (socket) => {
         ROOMS[room].timing.elapsed = 0
 
         io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
+    })
+
+    socket.on("endTimer", (data) => {
+        let room = data.room
+
+        ROOMS[room].timing.start = 0
+        ROOMS[room].timing.duration = 0
+        ROOMS[room].timing.elapsed = 0
+
+        io.to(room).emit("endTimer", data)
     })
 });
 

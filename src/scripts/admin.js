@@ -381,6 +381,7 @@ document.getElementById("endTimer").onclick = () => {
     })
     document.getElementById("timer").style.background = "#fff1f2"
     clearInterval(timerInterval)
+    document.getElementById("timer").innerText = "0.00"
 }
 
 const prepWindows = () => {

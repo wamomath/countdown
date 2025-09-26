@@ -192,6 +192,15 @@ socket.on("continueTimer", (data) => {
     }
 })
 
+//end animation for timer
+socket.on("endTimer", (data) => {
+    document.getElementById("favicon").href = "/assets/alarmred.svg";
+    document.getElementById("progress").style.backgroundColor = "#5cb85c"
+    document.getElementById("timer").style.backgroundColor = "#020617"
+    setProgressBar(0,0);
+    hasbuzzed = true;
+})
+
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
     if (event.key === ' ' && competitor1 && !hasbuzzed){
