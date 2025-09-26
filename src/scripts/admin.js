@@ -177,6 +177,15 @@ socket.on("startTimer", (data) => {
     startTimer(data.duration, data.start)
 })
 
+socket.on("pauseTimer", (data) => {
+    document.getElementById("timer").style.background = "#fff1f2"
+    clearInterval(timerInterval)
+})
+
+socket.on("continueTimer", (data) => {
+    startTimer(data.duration, Date.now() - data.elapsed);
+})
+
 //upon buzz shade buzzing side
 socket.on("buzz", (data) => {
     if (data.playernum == 1){
@@ -211,7 +220,7 @@ document.getElementById("upload").onclick = () => {
     })
 }
 
-document.getElementById("uploadExample").onclick= () => {
+document.getElementById("uploadExample").onclick = () => {
     if (!confirm("Are you sure you want to upload an example question set?")){
         return;
     }
@@ -346,6 +355,32 @@ document.getElementById("clearBuzz").onclick = () => {
     document.getElementById("p1").style.backgroundColor = "white";
     document.getElementById("p2").style.backgroundColor = "white";
     socket.emit("clearbuzz", {room: ROOM})
+}
+
+//start timer upon click
+document.getElementById("startTimer").onclick = () => {
+    socket.emit("startTimer", {
+        room: ROOM,
+        cur: cur
+    })
+}
+
+//continue timer upon click
+document.getElementById("continueTimer").onclick = () => {
+    socket.emit("continueTimer", {
+        room: ROOM,
+        cur: cur
+    })
+}
+
+//end timer upon click
+document.getElementById("endTimer").onclick = () => {
+    socket.emit("endTimer", {
+        room: ROOM,
+        cur: cur
+    })
+    document.getElementById("timer").style.background = "#fff1f2"
+    clearInterval(timerInterval)
 }
 
 const prepWindows = () => {

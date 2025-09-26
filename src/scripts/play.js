@@ -25,6 +25,7 @@ let competitor1 = false;
 let competitor2 = false;
 
 let hasbuzzed = true;
+let hasbuzzedtoggle = false;
 
 const bbcodeRender = (code) => {
     code = code
@@ -72,6 +73,7 @@ socket.on("clientSwitch", (data) => {
     }
     display(Number(data.cur));
     hasbuzzed = false;
+    hasbuzzedtoggle = false;
 });
 
 socket.on("clientUpload", (data) => {
@@ -163,6 +165,31 @@ socket.on("buzz", (data) => {
 socket.on("clearbuzz", (data) =>{
     document.getElementById("p1").style.backgroundColor = "white";
     document.getElementById("p2").style.backgroundColor = "white";
+    document.getElementById("progress").style.backgroundColor = "#5cb85c"
+    document.getElementById("timer").style.backgroundColor = "#020617"
+    if (!hasbuzzedtoggle) {
+        hasbuzzed = false;
+    }
+})
+
+//pause animation for timer
+socket.on("pauseTimer", (data) => {
+    document.getElementById("favicon").href = "/assets/alarmred.svg";
+    setProgressBar(0,0);
+    document.getElementById("progress").style.backgroundColor = "lightgreen"
+    document.getElementById("timer").style.backgroundColor = "lightgreen"
+    hasbuzzed = true;
+})
+
+//continue animation for timer
+socket.on("continueTimer", (data) => {
+    document.getElementById("favicon").href = "/assets/alarmgreen.svg";
+    document.getElementById("progress").style.backgroundColor = "#5cb85c"
+    document.getElementById("timer").style.backgroundColor = "#020617"
+    setProgressBar(data.duration, data.elapsed);
+    if (!hasbuzzedtoggle) {
+        hasbuzzed = false;
+    }
 })
 
 //keydown for the buzzers
@@ -173,14 +200,22 @@ document.addEventListener('keydown', function(event) {
             room: ROOM,
             playernum: 1
         })
-        hasbuzzed = true
+        socket.emit("pauseTimer", {
+            room: ROOM
+        })
+        hasbuzzed = true;
+        hasbuzzedtoggle = true;
     } else if (event.key === ' ' && competitor2 && !hasbuzzed){
         document.getElementById("p2").style.backgroundColor = "lightgreen";
         socket.emit("buzz", {
             room: ROOM,
             playernum: 2
         })
+        socket.emit("pauseTimer", {
+            room: ROOM
+        })
         hasbuzzed = true
+        hasbuzzedtoggle = true;
     }
 });
 

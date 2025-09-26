@@ -19,6 +19,7 @@ let ROOMS = {
         timing: {
             start: 0,
             duration: 0,
+            elapsed: 0
         },
         cur: 0
     }
@@ -85,11 +86,6 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("clientSwitch", data)
         io.to(room).emit("clientSwitch", data)
-
-        ROOMS[room].timing.start = Date.now()
-        ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
-
-        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
 
     socket.on("clientUpload", (data) => {
@@ -101,11 +97,6 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("adminJoin", ROOMS[room])
         io.to(room).emit("clientUpload", data)
-
-        ROOMS[room].timing.start = Date.now()
-        ROOMS[room].timing.duration = ROOMS[room].questions[0].timeMS
-
-        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
 
     socket.on("updateNames", (data) => {
@@ -142,6 +133,33 @@ io.on("connection", (socket) => {
         let room = data.room
 
         io.to(room).emit("clearbuzz", data)
+    })
+
+    socket.on("pauseTimer", (data) => {
+        let room = data.room
+
+        ROOMS[room].timing.elapsed = ROOMS[room].timing.elapsed + Date.now() - ROOMS[room].timing.start
+        console.log(ROOMS[room].timing.elapsed)
+
+        io.to(room).emit("pauseTimer", data)
+    })
+
+    socket.on("continueTimer", (data) => {
+        let room = data.room
+
+        ROOMS[room].timing.start = Date.now()
+
+        io.to(room).emit("continueTimer", ROOMS[room].timing)
+    })
+
+    socket.on("startTimer", (data) => {
+        let room = data.room
+
+        ROOMS[room].timing.start = Date.now()
+        ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
+        ROOMS[room].timing.elapsed = 0
+
+        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
 });
 
