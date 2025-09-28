@@ -72,13 +72,6 @@ const join = (data) => {
             }
 
             socket.emit("clientAccept", {"room": ROOM, "id": id})
-
-            // let a = document.querySelector(`.accept[data-id="${data.id}"]`);
-            // let b = document.querySelector(`.deny[data-id="${data.id}"]`);
-            // console.log(a);
-            // console.log(b);
-            // a.remove();
-            // b.remove();
         }
     })
 
