@@ -96,8 +96,10 @@ const join = (data) => {
         }
     }
 
-    document.getElementById("c1link").innerHTML += `<option value="${data.id}" id="${data.id}1">${data.id}</option>`;
-    document.getElementById("c2link").innerHTML += `<option value="${data.id}" id="${data.id}2">${data.id}</option>`;
+    if (document.querySelectorAll(`#${data.id}1`).length === 0){
+        document.getElementById("c1link").innerHTML += `<option value="${data.id}" id="${data.id}1">${data.id}</option>`;
+        document.getElementById("c2link").innerHTML += `<option value="${data.id}" id="${data.id}2">${data.id}</option>`;
+    }
 }
 
 socket.on("clientJoin", join)
@@ -175,6 +177,7 @@ socket.on("clientSwitch", (data) => {
 
 socket.on("startTimer", (data) => {
     startTimer(data.duration, data.start)
+    console.log(data.duration, data.start)
 })
 
 socket.on("pauseTimer", (data) => {

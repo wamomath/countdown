@@ -139,6 +139,8 @@ socket.on("resetScores", (data) => {
     document.getElementById("bar21").style.color = "rgb(217, 83, 79)";
     document.getElementById("bar22").style.color = "rgb(217, 83, 79)";
     document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
+    curp1score = 0;
+    curp2score = 0;
 });
 
 //socket checks if c1 or c2 is correct

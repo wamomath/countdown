@@ -13,8 +13,9 @@ let ROOMS = {
         key: "countdown",
         devices: {},
         questions: [
-            {"statement": "Slide 1", "timeMS": 0},
-            {"statement": "Slide 2", "timeMS": 0}
+            {"statement": "WAMO Countdown Platform", "timeMS": 0},
+            {"statement": "Test Slide (the answer is 1434)", "timeMS": 10000},
+            {"statement": "Answer: 1434", "timeMS": 0}
         ],
         timing: {
             start: 0,
@@ -143,22 +144,23 @@ io.on("connection", (socket) => {
         io.to(room).emit("pauseTimer", data)
     })
 
-    socket.on("continueTimer", (data) => {
-        let room = data.room
-
-        ROOMS[room].timing.start = Date.now()
-
-        io.to(room).emit("continueTimer", ROOMS[room].timing)
-    })
-
     socket.on("startTimer", (data) => {
         let room = data.room
 
         ROOMS[room].timing.start = Date.now()
         ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
         ROOMS[room].timing.elapsed = 0
+        console.log(ROOMS[room].timing.duration, ROOMS[room].timing.start)
 
         io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
+    })
+
+    socket.on("continueTimer", (data) => {
+        let room = data.room
+
+        ROOMS[room].timing.start = Date.now()
+
+        io.to(room).emit("continueTimer", ROOMS[room].timing)
     })
 
     socket.on("endTimer", (data) => {
