@@ -73,12 +73,12 @@ const join = (data) => {
 
             socket.emit("clientAccept", {"room": ROOM, "id": id})
 
-            let a = document.querySelector(`.accept[data-id="${data.id}"]`);
-            let b = document.querySelector(`.deny[data-id="${data.id}"]`);
-            console.log(a);
-            console.log(b);
-            a.remove();
-            b.remove();
+            // let a = document.querySelector(`.accept[data-id="${data.id}"]`);
+            // let b = document.querySelector(`.deny[data-id="${data.id}"]`);
+            // console.log(a);
+            // console.log(b);
+            // a.remove();
+            // b.remove();
         }
     })
 
@@ -96,9 +96,9 @@ const join = (data) => {
         }
     }
 
-    if (document.querySelectorAll(`#${data.id}1`).length === 0){
-        document.getElementById("c1link").innerHTML += `<option value="${data.id}" id="${data.id}1">${data.id}</option>`;
-        document.getElementById("c2link").innerHTML += `<option value="${data.id}" id="${data.id}2">${data.id}</option>`;
+    if (document.querySelectorAll(`option[data-id="${data.id}1"]`).length === 0){
+        document.getElementById("c1link").innerHTML += `<option value="${data.id}" data-id="${data.id}1">${data.id}</option>`;
+        document.getElementById("c2link").innerHTML += `<option value="${data.id}" data-id="${data.id}2">${data.id}</option>`;
     }
 }
 
@@ -124,8 +124,8 @@ socket.on("userDisconnect", (id) => {
     if (document.getElementById(`USER_${id}`)){
         document.getElementById(`USER_${id}`).remove()
     }
-    document.getElementById(`${id}1`).remove();
-    document.getElementById(`${id}2`).remove();
+    document.querySelector(`option[data-id="${id}1"]`).remove();
+    document.querySelector(`option[data-id="${id}2"]`).remove();
 })
 
 let renderMath = (element) => {
