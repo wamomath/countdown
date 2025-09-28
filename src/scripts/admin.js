@@ -76,7 +76,7 @@ const join = (data) => {
             let a = document.querySelector(`.accept[data-id="${data.id}"]`);
             let b = document.querySelector(`.deny[data-id="${data.id}"]`);
             console.log(a);
-            console.log(b)
+            console.log(b);
             a.remove();
             b.remove();
         }
@@ -177,7 +177,6 @@ socket.on("clientSwitch", (data) => {
 
 socket.on("startTimer", (data) => {
     startTimer(data.duration, data.start)
-    console.log(data.duration, data.start)
 })
 
 socket.on("pauseTimer", (data) => {
