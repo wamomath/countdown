@@ -150,7 +150,6 @@ io.on("connection", (socket) => {
         ROOMS[room].timing.start = Date.now()
         ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
         ROOMS[room].timing.elapsed = 0
-        console.log(ROOMS[room].timing.duration, ROOMS[room].timing.start)
 
         io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
     })
