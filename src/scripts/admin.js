@@ -13,7 +13,7 @@ const htmlCore = core(presetHTML5())
 let questions;
 let roomData;
 let cur;
-let waitingRoom = false;
+let waitingRoom = true;
 let curp1score = 0;
 let curp2score = 0;
 let elementtemp = "";
@@ -39,6 +39,9 @@ socket.on("connect", async () => {
 })
 
 socket.on("adminJoin", (data) => {
+    waitingRoom = data.waiting
+    document.getElementById("toggleWaitingRoom").innerHTML = `${['Enable', 'Disable'][Number(waitingRoom)]} Waiting Room`
+
     document.getElementById("devices_wrapper").innerHTML = ""
     document.getElementById("preview").innerHTML = ""
     document.getElementById("status").innerHTML = `ID: ${socket.id}`
@@ -48,7 +51,7 @@ socket.on("adminJoin", (data) => {
 
 })
 
-const join = (data) => {
+const join = (data) => {    
     let template = document.getElementById("user").content.cloneNode(true)
     template.querySelector(".head").innerText = data.name
     template.querySelector(".id").innerText = data.id
@@ -201,6 +204,11 @@ socket.on("buzz", (data) => {
     }
 })
 
+socket.on("toggleWaitingRoom", (data) => {
+    waitingRoom = data.waiting
+    document.getElementById("toggleWaitingRoom").innerHTML = `${['Enable', 'Disable'][Number(waitingRoom)]} Waiting Room`
+})
+
 document.getElementById("upload").onclick = () => {
     let code = prompt("Please upload the JSON list of your problems")
     try{
@@ -259,6 +267,9 @@ document.getElementById("download").onclick = () => {
 }
 
 document.getElementById("toggleWaitingRoom").onclick = () => {
+    socket.emit("toggleWaitingRoom", {
+        room: ROOM
+    })
     waitingRoom = !waitingRoom
     document.getElementById("toggleWaitingRoom").innerHTML = `${['Enable', 'Disable'][Number(waitingRoom)]} Waiting Room`
 }

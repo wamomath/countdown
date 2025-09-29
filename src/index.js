@@ -22,6 +22,7 @@ let ROOMS = {
             duration: 0,
             elapsed: 0
         },
+        waiting: true,
         cur: 0
     }
 } // Room Name : Room Key
@@ -170,6 +171,14 @@ io.on("connection", (socket) => {
         ROOMS[room].timing.elapsed = 0
 
         io.to(room).emit("endTimer", data)
+    })
+
+    socket.on("toggleWaitingRoom", (data) => {
+        let room = data.room
+
+        ROOMS[room].waiting = !ROOMS[room].waiting
+
+        io.to(room).emit("toggleWaitingRoom", ROOMS[room])
     })
 });
 
