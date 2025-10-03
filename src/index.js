@@ -187,6 +187,15 @@ app.get("/creator", (req, res) => {
     res.sendFile(__dirname + "/creator.html")
 })
 
+app.get("/sync", (req, res) => {
+    let client_time = req.query.client_time;
+    let server_time = Date.now();
+
+    let server_client_request_diff_time = server_time - client_time;
+
+    return res.json({diff: server_client_request_diff_time, server_time: server_time})
+})
+
 app.get("/play", (req, res) => {
     let name = req.query.name
     let key = req.query.key
@@ -221,6 +230,10 @@ app.get("/scripts/play.js", (req, res) => {
 
 app.get("/scripts/lander.js", (req, res) => {
     res.sendFile(__dirname + "/scripts/lander.js")
+})
+
+app.get("/scripts/utils.js", (req, res) => {
+    res.sendFile(__dirname + "/scripts/utils.js")
 })
 
 app.get("/styles/play.css", (req, res) => {
