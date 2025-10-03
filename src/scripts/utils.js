@@ -1,3 +1,5 @@
+let OFFSET = 0;
+
 const getTimeOffset = async () => {
     let client_time = Date.now();
 
@@ -10,12 +12,13 @@ const getTimeOffset = async () => {
     let serverClientRequestDiffTime = server_info.diff;
     let serverTimestamp = server_info.server_time;
 
-    // Calculate server-client difference time on response and response time
     let serverClientResponseDiffTime = nowTimeStamp - serverTimestamp;
-    let responseTime = (serverClientRequestDiffTime - nowTimeStamp + client_time - serverClientResponseDiffTime ) / 2
 
+    // Calculate server-client difference time on response and response time
     // Calculate the synced server time
-    return (serverClientResponseDiffTime - responseTime);
+    return (serverClientRequestDiffTime - nowTimeStamp + client_time - serverClientResponseDiffTime) / 2;
+}
 
-
+const getSyncedServerTime = () => {
+    return Date.now() + OFFSET;
 }

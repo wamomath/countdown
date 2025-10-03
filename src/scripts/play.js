@@ -41,8 +41,12 @@ window.onload = () => {
     document.getElementById("name").innerText = `PLAYING AS ${USERNAME}`;
 };
 
-socket.on("connect", () => {
+socket.on("connect", async () => {
     document.getElementById("status").innerText = `ID: ${socket.id}`;
+
+    OFFSET = await getTimeOffset()
+
+    console.log("TIME COMPENSATION IN MILLISECONDS", OFFSET)
 
     socket.emit("clientJoin", {
         name: USERNAME,
@@ -89,7 +93,7 @@ socket.on("startTimer", (data) => {
     if (!accepted) {
         return;
     }
-    setProgressBar(data.duration, Date.now() - data.start);
+    setProgressBar(data.duration, getSyncedServerTime() - data.start);
 });
 
 //socket updates names and displays them

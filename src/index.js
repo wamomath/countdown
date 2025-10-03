@@ -291,6 +291,6 @@ app.get("/fonts/CMUSerif-BoldItalic.woff2", (req, res) => {
     res.sendFile(__dirname + "/fonts/CMUSerif-BoldItalic.woff2")
 })
 
-server.listen(8000, () => {
+server.listen(8000,() => {
     console.log("Server online at port *:8000")
 });

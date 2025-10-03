@@ -27,7 +27,11 @@ const bbcodeRender = (code) => {
 }
 window.bbcodeRender=bbcodeRender
 
-socket.on("connect", () => {
+socket.on("connect", async () => {
+    OFFSET = await getTimeOffset()
+
+    console.log("TIME COMPENSATION IN MILLISECONDS", OFFSET)
+
     socket.emit("adminJoin", {
         username: USERNAME,
         room: ROOM
@@ -185,7 +189,7 @@ socket.on("pauseTimer", (data) => {
 })
 
 socket.on("continueTimer", (data) => {
-    startTimer(data.duration, Date.now() - data.elapsed);
+    startTimer(data.duration, getSyncedServerTime() - data.elapsed);
 })
 
 //upon buzz shade buzzing side
@@ -456,9 +460,9 @@ const startTimer = (duration, start) => {
     document.getElementById("timer").style.background = "#d1fae5"
 
     timerInterval = setInterval(() => {
-        document.getElementById("timer").innerText = (Math.max(0, target - Date.now())/1000).toFixed(2)
+        document.getElementById("timer").innerText = (Math.max(0, target - getSyncedServerTime())/1000).toFixed(2)
 
-        if (target < Date.now()){
+        if (target < getSyncedServerTime()){
             document.getElementById("timer").style.background = "#fff1f2"
             clearInterval(timerInterval)
         }
