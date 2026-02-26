@@ -228,6 +228,11 @@ app.get("/play", (req, res) => {
     res.sendFile(__dirname + "/play.html")
 })
 
+app.get("/converter", (req, res) => {
+    res.sendFile(__dirname + "/converter.html")
+})
+
+
 
 app.get("/styles/lander.css", (req, res) => {
     res.sendFile(__dirname + "/styles/lander.css")
