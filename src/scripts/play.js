@@ -10,8 +10,6 @@ const ROOM = PARAMS.get("room").toUpperCase();
 
 const socket = io();
 
-let questions;
-
 const htmlCore = core(presetHTML5());
 
 let progressBarCounter = 0;
@@ -21,8 +19,6 @@ let accepted = false;
 let curp1score = 0;
 let curp2score = 0;
 
-let competitor1 = false;
-let competitor2 = false;
 
 let hasbuzzed = true;
 let hasbuzzedtoggle = false;
@@ -31,21 +27,21 @@ let game;
 
 class CountdownGame extends Game{
     key;
-    devices;
     questions;
     timing;
     waiting;
     cur;
+    competitor;
 
 
     constructor(room, socket, state){
         super(room, socket, state);
         this.key = new Property(this, "devices", {})
-        this.questions = new Property(this, "questions", {})
+        this.questions = new QuestionsProperty(this, "questions", {})
         this.timing = new Property(this, "timing", {})
         this.waiting = new Property(this, "waiting", true)
         this.cur = new CurProperty(this, "cur")
-        this.devices = new Property(this, "devices", {})
+        this.competitor = new CompetitorProperty(this, "competitor", true)
         this.processState(state, false)
         socket.on("roomStateUpdate", (data) => {
             console.log("update", data)
@@ -57,12 +53,18 @@ class CountdownGame extends Game{
 
     processState(state, render=true){
         for (let identifier in state){
+            if (!this.hasOwnProperty(identifier)){
+                continue;
+            }
             let property = this[identifier];
             property.updateExternal(state[identifier]);
         }
 
         if (render){
             for (let identifier in state){
+                if (!this.hasOwnProperty(identifier)) {
+                    continue;
+                }
                 let property = this[identifier];
                 property.render()
             }
@@ -124,15 +126,14 @@ socket.on("clientAccept", (data) => {
     accepted = true;
     document.getElementById("waiting").style.display = "none";
 
-    questions = data.questions;
-
     document.getElementById("questions").style.display = "block";
     document.getElementById("timer").style.display = "block";
     document.getElementById("vsbar").style.display = "flex";
 
-    display(Number(data.cur));
+    console.log("RECEIVING DATA")
 
     game = new CountdownGame(ROOM, socket, data)
+    window.game = game
     game.renderAll()
 });
 
@@ -151,14 +152,31 @@ class CurProperty extends Property{
     }
 }
 
-socket.on("clientUpload", (data) => {
-    if (!accepted) {
-        return;
+class QuestionsProperty extends Property{
+    renderInternal() {
+        console.log("New Question Set Uploaded!")
     }
-    questions = data.code;
+}
 
-    display(Number(0));
-});
+class CompetitorProperty extends Property{
+    renderInternal() {
+        document.querySelector("footer").classList.remove("one")
+        document.querySelector("footer").classList.remove("two")
+        if (this.isCompetitor1()){
+            document.querySelector("footer").classList.add("one")
+        }else if (this.isCompetitor2()){
+            document.querySelector("footer").classList.add("two")
+        }
+    }
+
+    isCompetitor1(){
+        return socket.id === this.data.competitor1
+    }
+
+    isCompetitor2() {
+        return socket.id === this.data.competitor2
+    }
+}
 
 socket.on("startTimer", (data) => {
     if (!accepted) {
@@ -218,16 +236,6 @@ socket.on("resetScores", (data) => {
     curp2score = 0;
 });
 
-//socket checks if c1 or c2 is correct
-socket.on("assignCompetitors", (data) => {
-    competitor1 = false;
-    competitor2 = false;
-    if (data.c1link == socket.id) {
-        competitor1 = true;
-    } else if (data.c2link == socket.id) {
-        competitor2 = true;
-    }
-})
 
 //upon buzz shade buzzing side
 socket.on("buzz", (data) => {
@@ -280,7 +288,12 @@ socket.on("endTimer", (data) => {
 
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
-    if (event.key === ' ' && competitor1 && !hasbuzzed){
+    if (!game){
+        return;
+    }
+    console.log("BUZING AT", event.key === ' ', game.competitor.isCompetitor1(), !hasbuzzed)
+    if (event.key === ' ' && game.competitor.isCompetitor1() && !hasbuzzed){
+        console.log("buzzing c1")
         document.getElementById("p1").style.backgroundColor = "lightgreen";
         socket.emit("buzz", {
             room: ROOM,
@@ -291,7 +304,8 @@ document.addEventListener('keydown', function(event) {
         })
         hasbuzzed = true;
         hasbuzzedtoggle = true;
-    } else if (event.key === ' ' && competitor2 && !hasbuzzed){
+    } else if (event.key === ' ' && game.competitor.isCompetitor2() && !hasbuzzed){
+        console.log("buzzing c2")
         document.getElementById("p2").style.backgroundColor = "lightgreen";
         socket.emit("buzz", {
             room: ROOM,
@@ -307,7 +321,7 @@ document.addEventListener('keydown', function(event) {
 
 const display = (num) => {
     document.getElementById("questions_inner").innerHTML = bbcodeRender(
-        questions[num].statement,
+        game.questions.getData()[num].statement,
     );
 
     renderMath(document.getElementById("questions"));

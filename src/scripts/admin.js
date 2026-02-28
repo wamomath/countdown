@@ -10,9 +10,6 @@ const ROOM = PARAMS.get("room").toUpperCase();
 const socket = io();
 
 const htmlCore = core(presetHTML5());
-let questions;
-let roomData;
-let waitingRoom = true;
 let curp1score = 0;
 let curp2score = 0;
 let elementtemp = "";
@@ -26,16 +23,20 @@ class CountdownGame extends Game{
     timing;
     waiting;
     cur;
+    competitor;
+    adminList
 
 
     constructor(room, socket, state){
         super(room, socket, state);
+        this.adminList = new AdminListProperty(this, "adminList", {})
         this.key = new Property(this, "devices", {})
         this.questions = new QuestionProperty(this, "questions", {})
         this.timing = new Property(this, "timing", {})
-        this.waiting = new Property(this, "waiting", true)
+        this.waiting = new WaitingProperty(this, "waiting", true)
         this.cur = new CurProperty(this, "cur")
         this.devices = new DeviceProperty(this, "devices", {})
+        this.competitor = new CompetitorProperty(this, "competitor", {})
         this.processState(state, false)
         socket.on("roomStateUpdate", (data) => {
             console.log("update", data)
@@ -74,7 +75,8 @@ class CountdownGame extends Game{
             questions: this.questions.toJSON(),
             timing: this.timing.toJSON(),
             waiting: this.waiting.toJSON(),
-            cur: this.cur.toJSON()
+            cur: this.cur.toJSON(),
+            competitor: this.competitor.toJSON()
         }
     }
 }
@@ -104,87 +106,16 @@ socket.on("adminJoin", (data) => {
     game = new CountdownGame(ROOM, socket, data)
     window.game = game
 
-    waitingRoom = data.waiting;
     document.getElementById("toggleWaitingRoom").innerHTML =
-        `${["Enable", "Disable"][Number(waitingRoom)]} Waiting Room`;
+        `${["Enable", "Disable"][Number(game.waiting.getData())]} Waiting Room`;
 
     document.getElementById("devices_wrapper").innerHTML = "";
-    document.getElementById("preview").innerHTML = "";
     document.getElementById("status").innerHTML = `ID: ${socket.id}`;
     document.getElementById("name").innerHTML = `REGISTERED AS ${USERNAME}`;
 
     game.renderAll()
     setCallbacks()
 });
-
-const join = (data) => {
-    let template = document.getElementById("user").content.cloneNode(true);
-    template.querySelector(".head").innerText = data.name;
-    template.querySelector(".id").innerText = data.id;
-    template.querySelector(".user_wrapper").id = `USER_${data.id}`;
-    template.querySelector(".accept").setAttribute("data-id", data.id);
-    template.querySelector(".deny").setAttribute("data-id", data.id);
-    template.querySelector(".device").setAttribute("data-id", data.id);
-
-    if (data.status) {
-        console.log(data.status);
-        template.querySelector(".accept").remove();
-        template.querySelector(".deny").remove();
-        template.querySelector(`.user_wrapper`).classList.remove("pending");
-    }
-
-    document.getElementById("devices_wrapper").appendChild(template);
-
-    document.querySelectorAll(".accept, .deny").forEach((e) => {
-        e.onclick = () => {
-            let id = e.getAttribute("data-id");
-
-            if (e.classList.contains("deny")) {
-                socket.emit("clientDeny", { room: ROOM, id: id });
-                return;
-            }
-
-            socket.emit("clientAccept", { room: ROOM, id: id });
-
-            // let a = document.querySelector(`.accept[data-id="${data.id}"]`);
-            // let b = document.querySelector(`.deny[data-id="${data.id}"]`);
-            // console.log(a);
-            // console.log(b);
-            // a.remove();
-            // b.remove();
-        };
-    });
-
-    document.querySelector(".user_wrapper:last-of-type .device").onclick = (
-        e,
-    ) => {
-        if (!confirm("Are you sure you want to kick this user?")) {
-            return;
-        }
-        socket.emit("clientDeny", {
-            room: ROOM,
-            id: e.currentTarget.getAttribute("data-id"),
-        });
-    };
-
-    if (!waitingRoom) {
-        let obj = document.querySelector(".user_wrapper:last-of-type .accept");
-        if (obj) {
-            obj.click();
-        }
-    }
-
-    if (
-        document.querySelectorAll(`option[data-id="${data.id}1"]`).length === 0
-    ) {
-        document.getElementById("c1link").innerHTML +=
-            `<option value="${data.id}" data-id="${data.id}1">${data.id}</option>`;
-        document.getElementById("c2link").innerHTML +=
-            `<option value="${data.id}" data-id="${data.id}2">${data.id}</option>`;
-    }
-};
-
-socket.on("clientJoin", join);
 
 socket.on("clientAccept", (data) => {
     try {
@@ -200,18 +131,6 @@ socket.on("clientAccept", (data) => {
     if (b) {
         b.remove();
     }
-});
-
-socket.on("clientDeny", (data) => {
-    document.querySelector(`#USER_${data.id}`).remove();
-});
-
-socket.on("userDisconnect", (id) => {
-    if (document.getElementById(`USER_${id}`)) {
-        document.getElementById(`USER_${id}`).remove();
-    }
-    document.querySelector(`option[data-id="${id}1"]`).remove();
-    document.querySelector(`option[data-id="${id}2"]`).remove();
 });
 
 let renderMath = (element) => {
@@ -255,12 +174,6 @@ socket.on("buzz", (data) => {
     }
 });
 
-socket.on("toggleWaitingRoom", (data) => {
-    waitingRoom = data.waiting;
-    document.getElementById("toggleWaitingRoom").innerHTML =
-        `${["Enable", "Disable"][Number(waitingRoom)]} Waiting Room`;
-});
-
 document.getElementById("upload").onclick = () => {
     let code = prompt("Please upload the JSON list of your problems");
     try {
@@ -280,19 +193,16 @@ document.getElementById("upload").onclick = () => {
         return;
     }
 
-    socket.emit("clientUpload", {
-        room: ROOM,
-        code: JSON.parse(code),
-    });
+    game.questions.update(JSON.parse(code))
+    game.cur.update(0)
 };
 
 document.getElementById("uploadExample").onclick = () => {
     if (!confirm("Are you sure you want to upload an example question set?")) {
         return;
     }
-    socket.emit("clientUpload", {
-        room: ROOM,
-        code: [
+    game.questions.update(
+        [
             { statement: "2025 AIME I\nWAMO Countdown Platform", timeMS: 0 },
             {
                 statement:
@@ -374,8 +284,9 @@ document.getElementById("uploadExample").onclick = () => {
                     "==Problem 15==  \n\nLet $N$ denote the number of ordered triples of positive integers $(a, b, c)$ such that $a, b, c \\leq 3^6$ and $a^3 + b^3 + c^3$ is a multiple of $3^7$. Find the remainder when $N$ is divided by $1000$.\n",
                 timeMS: 10000,
             },
-        ], //extra comma?
-    });
+        ]
+    );
+    game.cur.update(0)
 };
 
 document.getElementById("download").onclick = () => {
@@ -384,12 +295,7 @@ document.getElementById("download").onclick = () => {
 };
 
 document.getElementById("toggleWaitingRoom").onclick = () => {
-    socket.emit("toggleWaitingRoom", {
-        room: ROOM,
-    });
-    waitingRoom = !waitingRoom;
-    document.getElementById("toggleWaitingRoom").innerHTML =
-        `${["Enable", "Disable"][Number(waitingRoom)]} Waiting Room`;
+    game.waiting.update(!game.waiting.getData())
 };
 
 document.getElementById("openQuestionEditor").onclick = () => {
@@ -466,28 +372,6 @@ document.getElementById("resetscores").onclick = () => {
 };
 
 //competitor computers are set
-document.getElementById("clinkset").onclick = () => {
-    if (
-        !confirm(
-            "Are you sure you are assigning the competitors to the right computers?",
-        )
-    ) {
-        return;
-    }
-    let c1link = document.getElementById("c1link").value;
-    let c2link = document.getElementById("c2link").value;
-    if (c1link == "none" || c2link == "none") {
-        alert("Please assign computers to both fields.");
-    } else if (c1link === c2link) {
-        alert("Please assign different computers to each competitor.");
-    } else {
-        socket.emit("assignCompetitors", {
-            room: ROOM,
-            c1link: c1link,
-            c2link: c2link,
-        });
-    }
-};
 
 //clears buzz
 document.getElementById("clearBuzz").onclick = () => {
@@ -599,6 +483,7 @@ class QuestionProperty extends Property{
     renderInternal(){
 
         let questions = this.data;
+        document.getElementById("preview").innerHTML = "";
         console.log(questions, game)
 
         for (let i = 0; i < questions.length; i++) {
@@ -620,17 +505,153 @@ class QuestionProperty extends Property{
     }
 }
 
-class DeviceProperty extends Property{
+class DeviceProperty extends AdminProperty{
     renderInternal(){
         document.getElementById("devices_wrapper").innerHTML = ""
         for (let user in this.data) {
-            console.log(this.data)
-            join({
+            this.join({
                 room: this.game.room,
                 name: this.data[user].name,
                 id: user,
                 status: this.data[user].status,
             });
         }
+    }
+
+    join = (data) => {
+        let template = document.getElementById("user").content.cloneNode(true);
+        template.querySelector(".head").innerText = data.name;
+        template.querySelector(".id").innerText = data.id;
+        template.querySelector(".user_wrapper").id = `USER_${data.id}`;
+        template.querySelector(".accept").setAttribute("data-id", data.id);
+        template.querySelector(".deny").setAttribute("data-id", data.id);
+        template.querySelector(".device").setAttribute("data-id", data.id);
+
+        let type = 0;
+
+        if (game.competitor.getData().competitor1 === data.id){
+            type = 1;
+        }else if (game.competitor.getData().competitor2 === data.id){
+            type = 2;
+        }
+
+        template.querySelector(".user_type").classList.add(['spectator', 'one', 'two'][type])
+        template.querySelector(".user_type").innerHTML = (['S', '1', '2'][type])
+        template.querySelector(".user_type").setAttribute("data-id", data.id);
+        template.querySelector(".user_type").setAttribute("data-type", type);
+
+        if (data.status) {
+            console.log(data.status);
+            template.querySelector(".accept").remove();
+            template.querySelector(".deny").remove();
+            template.querySelector(`.user_wrapper`).classList.remove("pending");
+        }
+
+        document.getElementById("devices_wrapper").appendChild(template);
+
+        document.querySelectorAll(".accept, .deny").forEach((e) => {
+            e.onclick = () => {
+                let id = e.getAttribute("data-id");
+
+                if (e.classList.contains("deny")) {
+                    socket.emit("clientDeny", { room: ROOM, id: id });
+                    return;
+                }
+
+                socket.emit("clientAccept", { room: ROOM, id: id });
+
+                // let a = document.querySelector(`.accept[data-id="${data.id}"]`);
+                // let b = document.querySelector(`.deny[data-id="${data.id}"]`);
+                // console.log(a);
+                // console.log(b);
+                // a.remove();
+                // b.remove();
+            };
+        });
+
+        document.querySelector(".user_wrapper:last-of-type .device").onclick = (
+            e,
+        ) => {
+            if (!confirm("Are you sure you want to kick this user?")) {
+                return;
+            }
+            socket.emit("clientDeny", {
+                room: ROOM,
+                id: e.currentTarget.getAttribute("data-id"),
+            });
+
+        };
+
+        if (!data.status && !game.waiting.getData()) {
+            let obj = document.querySelector(".user_wrapper:last-of-type .accept");
+            if (obj) {
+                obj.click();
+            }
+        }
+
+        document.querySelectorAll('.user_type').forEach(a=>a.onclick = (e) => {
+            let id = e.currentTarget.getAttribute("data-id")
+            let type = Number(e.currentTarget.getAttribute("data-type"))
+
+            console.log(id, type)
+
+            if (type === 0 && game.competitor.getData().competitor1 && game.competitor.getData().competitor2){
+                return;
+            }
+
+            if (type === 1){
+                game.competitor.updateCompetitor1(null)
+                if (!game.competitor.getData().competitor2){
+                    game.competitor.updateCompetitor2(id)
+                }
+            }else if (type === 2){
+                game.competitor.updateCompetitor2(null)
+            }else{
+                if (game.competitor.getData().competitor1){
+                    game.competitor.updateCompetitor2(id)
+                }else{
+                    game.competitor.updateCompetitor1(id)
+                }
+            }
+        })
+    };
+}
+
+class WaitingProperty extends Property{
+    renderInternal() {
+        document.getElementById("toggleWaitingRoom").innerHTML =
+            `${["Enable", "Disable"][Number(this.data)]} Waiting Room`;
+    }
+}
+
+class AdminListProperty extends Property{
+    renderInternal() {
+        let content = []
+        for (let key in this.data){
+            content.push(this.data[key])
+        }
+
+        document.getElementById("adminList").innerText = `Connected Admins: ${content.join(", ")}`
+    }
+}
+
+class CompetitorProperty extends Property{
+    renderInternal() {}
+
+    update(data){
+        console.log("UPDATING COMPETITORS")
+        this.data = data
+        this.game.update(this)
+        this.game.devices.update(this.game.devices.getData())
+    }
+
+    updateCompetitor1(id){
+        this.data.competitor1  = id
+        this.update(this.data)
+    }
+
+    updateCompetitor2(id){
+        this.data.competitor2 = id
+        this.update(this.data)
     }
 }

@@ -33,6 +33,14 @@ footer {
     flex-wrap: wrap;
 }
 
+footer.one{
+    background: #0369a1;
+}
+
+footer.two{
+    background: #be123c;
+}
+
 main {
     flex: 1;
     height: 100%;

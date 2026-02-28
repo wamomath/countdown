@@ -26,6 +26,14 @@ class Game {
         });
     }
 
+    updateAdmin(property){
+        this.socket.emit("adminRoomStateUpdate", {
+            room: this.room,
+            identifier: property.getIdentifier(),
+            data: property.getData()
+        });
+    }
+
     // TODO: abstract
     toJSON(){}
 }
@@ -72,5 +80,12 @@ class Property {
 
     toJSON(){
         return this.data;
+    }
+}
+
+class AdminProperty extends Property{
+    update(data) {
+        this.data = data
+        this.game.updateAdmin(this)
     }
 }

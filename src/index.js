@@ -12,6 +12,7 @@ const io = new Server(server);
 
 let ROOMS = {
     "WAMO": {
+        adminList: {},
         key: "countdown",
         devices: {},
         questions: [
@@ -25,7 +26,11 @@ let ROOMS = {
             elapsed: 0
         },
         waiting: true,
-        cur: 0
+        cur: 0,
+        competitor: {
+            competitor1: null,
+            competitor2: null
+        }
     }
 } // Room Name : Room Key
 
@@ -34,30 +39,80 @@ io.on("connection", (socket) => {
 
     socket.on("clientJoin", (data) => {
         socket.join(data.room)
-        io.to(data.room + "_ADMIN").emit("clientJoin", {
-            ...data,
-            id: socket.id
-        })
         ROOMS[data.room].devices[socket.id] = {
             name: data.name,
-            status: false
+            status: false,
         }
+
+        io.to(data.room + "_ADMIN").emit("roomStateUpdate", {
+            room: data.room,
+            identifier: "devices",
+            data: ROOMS[data.room].devices
+        })
+
     })
 
     socket.on("adminJoin", (data) => {
         socket.join([data.room, data.room + "_ADMIN"])
         socket.emit("adminJoin", ROOMS[data.room])
         socket.emit("startTimer", ROOMS[data.room].timing)
+
+        ROOMS[data.room].adminList[socket.id] = data.username
+        io.to(data.room + "_ADMIN").emit("roomStateUpdate", {
+            room: data.room,
+            identifier: "adminList",
+            data: ROOMS[data.room].adminList
+        })
     })
 
-    socket.on("disconnect", (reason) => {
-        for (let room in ROOMS){
+    socket.on("disconnecting", (reason) => {
+        let curRoom = "";
+        for (let room of socket.rooms){
+            if (!ROOMS.hasOwnProperty(room)){
+                continue;
+            }
+
+
             if (ROOMS[room].devices.hasOwnProperty(socket.id)){
                 delete ROOMS[room].devices[socket.id]
+                curRoom = room
+            }
+
+            if (ROOMS[room].adminList.hasOwnProperty(socket.id)){
+                delete ROOMS[room].adminList[socket.id]
+                io.to(room + "_ADMIN").emit("roomStateUpdate", {
+                    room: room,
+                    identifier: "adminList",
+                    data: ROOMS[room].adminList
+                })
+            }
+
+            if (socket.id === ROOMS[room].competitor.competitor1){
+                ROOMS[room].competitor.competitor1 = null
+            }
+
+            if (socket.id === ROOMS[room].competitor.competitor2) {
+                ROOMS[room].competitor.competitor2 = null
             }
         }
 
-        io.emit("userDisconnect", socket.id)
+
+        if (!ROOMS.hasOwnProperty(curRoom)){
+            return;
+        }
+
+
+        io.to(curRoom).emit("roomStateUpdate", {
+            room: curRoom,
+            identifier: 'competitor',
+            data: ROOMS[curRoom].competitor
+        })
+
+        io.to(curRoom).emit("roomStateUpdate", {
+            room: curRoom,
+            identifier: 'devices',
+            data: ROOMS[curRoom].devices
+        })
     })
 
     socket.on("clientAccept", (data) => {
@@ -72,6 +127,13 @@ io.on("connection", (socket) => {
         io.to(id).emit("startTimer", ROOMS[room].timing)
 
         ROOMS[room].devices[id].status = true
+
+        io.to(room + "_ADMIN").emit("roomStateUpdate", {
+            room: room,
+            identifier: 'devices',
+            data: ROOMS[room].devices
+        })
+
     })
 
     socket.on("clientDeny", (data) => {
@@ -81,6 +143,12 @@ io.on("connection", (socket) => {
         io.to(room + "_ADMIN").emit("clientDeny", data)
         io.to(id).emit("clientDeny", data)
         delete ROOMS[room].devices[id]
+
+        io.to(room + "_ADMIN").emit("roomStateUpdate", {
+            room: room,
+            identifier: 'devices',
+            data: ROOMS[room].devices
+        })
     })
 
     socket.on("clientSwitch", (data) => {
@@ -192,6 +260,17 @@ io.on("connection", (socket) => {
 
 
         io.to(room).emit("roomStateUpdate", payload)
+    })
+
+    socket.on("adminRoomStateUpdate", (payload) => {
+        let room = payload.room
+        let data = payload.data
+        let identifier = payload.identifier
+
+        ROOMS[room][identifier] = data
+
+
+        io.to(room + "_ADMIN").emit("roomStateUpdate", payload)
     })
 });
 

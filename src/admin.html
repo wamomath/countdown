@@ -73,9 +73,6 @@
                 <button class="action" id="resetscores">Reset Scores</button>
                 <br>
                 <br>
-                <select name="c1link" id="c1link" class="clink"><option value="none">No Player 1</option></select>
-                <select name="c2link" id="c2link" class="clink"><option value="none">No Player 2</option></select>
-                <button class="action" id="clinkset">Confirm Competitor Computers</button>
             </div>
             <br>
             <button class="action" id="clearBuzz">Clear Buzz</button>
@@ -109,6 +106,7 @@
         </div>
         <div id="devices">
             <h1>Devices Connected</h1>
+            <div id="adminList"></div>
             <div id="devices_wrapper"></div>
         </div>
     </aside>
@@ -137,13 +135,14 @@
 
 <template id="user">
     <div class="user_wrapper pending">
+        <button class="user_type">S</button>
         <div class="user">
             <div class="device">
                 <div class="left">
                     <div class="head">Laptop</div>
                     <div class="id">192.168.0.1</div>
                 </div>
-                <div class="status">CONNECTED</div>
+                <div class="status">CON</div>
             </div>
         </div>
         <button class="accept"><i class="fa-solid fa-check"></i></button>

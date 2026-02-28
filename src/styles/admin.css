@@ -307,3 +307,23 @@ div#devices_wrapper {
     border-radius: 4px;
     box-sizing: border-box;
 }
+
+.user_type{
+    width: 57px;
+    border-radius: 100%;
+    border: 1px solid black;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.user_type.spectator{
+    background: #e7e5e4;
+}
+
+.user_type.one{
+    background: #bfdbfe;
+}
+
+.user_type.two{
+    background: #fecaca;
+}
