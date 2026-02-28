@@ -1,6 +1,8 @@
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const path = require('path');
+
 const fs = require("fs")
 const jwt = require('jsonwebtoken');
 
@@ -232,78 +234,14 @@ app.get("/converter", (req, res) => {
     res.sendFile(__dirname + "/converter.html")
 })
 
+app.use('/styles', express.static(path.join(__dirname, 'styles')));
 
+app.use('/scripts', express.static(path.join(__dirname, 'scripts')));
 
-app.get("/styles/lander.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/lander.css")
-})
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
-app.get("/scripts/play.js", (req, res) => {
-    res.sendFile(__dirname + "/scripts/play.js")
-})
+app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
 
-app.get("/scripts/lander.js", (req, res) => {
-    res.sendFile(__dirname + "/scripts/lander.js")
-})
-
-app.get("/scripts/utils.js", (req, res) => {
-    res.sendFile(__dirname + "/scripts/utils.js")
-})
-
-app.get("/styles/play.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/play.css")
-})
-
-app.get("/scripts/admin.js", (req, res) => {
-    res.sendFile(__dirname + "/scripts/admin.js")
-})
-
-app.get("/styles/admin.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/admin.css")
-})
-
-app.get("/styles/p.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/p.css")
-})
-
-app.get("/scripts/creator.js", (req, res) => {
-    res.sendFile(__dirname + "/scripts/creator.js")
-})
-
-app.get("/assets/alarmred.svg", (req, res) => {
-    res.sendFile(__dirname + "/assets/alarmred.svg")
-})
-
-app.get("/assets/alarmgreen.svg", (req, res) => {
-    res.sendFile(__dirname + "/assets/alarmgreen.svg")
-})
-
-app.get("/styles/creator.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/creator.css")
-})
-app.get("/assets/logo.png", (req, res) => {
-    res.sendFile(__dirname + "/assets/logo.png")
-})
-
-app.get("/styles/cmu.css", (req, res) => {
-    res.sendFile(__dirname + "/styles/cmu.css")
-})
-
-app.get("/fonts/CMUSerif-Roman.woff2", (req, res) => {
-    res.sendFile(__dirname + "/fonts/CMUSerif-Roman.woff2")
-})
-
-app.get("/fonts/CMUSerif-Bold.woff2", (req, res) => {
-    res.sendFile(__dirname + "/fonts/CMUSerif-Bold.woff2")
-})
-
-app.get("/fonts/CMUSerif-Italic.woff2", (req, res) => {
-    res.sendFile(__dirname + "/fonts/CMUSerif-Italic.woff2")
-})
-
-app.get("/fonts/CMUSerif-BoldItalic.woff2", (req, res) => {
-    res.sendFile(__dirname + "/fonts/CMUSerif-BoldItalic.woff2")
-})
 
 server.listen(8000,() => {
     console.log("Server online at port *:8000")
