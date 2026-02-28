@@ -12,11 +12,72 @@ const socket = io();
 const htmlCore = core(presetHTML5());
 let questions;
 let roomData;
-let cur;
 let waitingRoom = true;
 let curp1score = 0;
 let curp2score = 0;
 let elementtemp = "";
+
+let game;
+
+class CountdownGame extends Game{
+    key;
+    devices;
+    questions;
+    timing;
+    waiting;
+    cur;
+
+
+    constructor(room, socket, state){
+        super(room, socket, state);
+        this.key = new Property(this, "devices", {})
+        this.questions = new QuestionProperty(this, "questions", {})
+        this.timing = new Property(this, "timing", {})
+        this.waiting = new Property(this, "waiting", true)
+        this.cur = new CurProperty(this, "cur")
+        this.devices = new DeviceProperty(this, "devices", {})
+        this.processState(state, false)
+        socket.on("roomStateUpdate", (data) => {
+            console.log("update", data)
+            let dataState = {}
+            dataState[data.identifier] = data.data
+            this.processState(dataState)
+        });
+    }
+
+    processState(state, render=true){
+        for (let identifier in state){
+            let property = this[identifier];
+            property.updateExternal(state[identifier]);
+        }
+
+        if (render){
+            for (let identifier in state){
+                let property = this[identifier];
+                property.render()
+            }
+        }
+    }
+
+    renderAll() {
+        for (let identifier in this){
+            if (this[identifier].render){
+                this[identifier].render()
+            }
+        }
+    }
+
+    toJSON(){
+        return {
+            key: this.key.toJSON(),
+            devices: this.devices.toJSON(),
+            questions: this.questions.toJSON(),
+            timing: this.timing.toJSON(),
+            waiting: this.waiting.toJSON(),
+            cur: this.cur.toJSON()
+        }
+    }
+}
 
 const bbcodeRender = (code) => {
     code = code
@@ -40,6 +101,9 @@ socket.on("connect", async () => {
 });
 
 socket.on("adminJoin", (data) => {
+    game = new CountdownGame(ROOM, socket, data)
+    window.game = game
+
     waitingRoom = data.waiting;
     document.getElementById("toggleWaitingRoom").innerHTML =
         `${["Enable", "Disable"][Number(waitingRoom)]} Waiting Room`;
@@ -49,7 +113,8 @@ socket.on("adminJoin", (data) => {
     document.getElementById("status").innerHTML = `ID: ${socket.id}`;
     document.getElementById("name").innerHTML = `REGISTERED AS ${USERNAME}`;
 
-    prepQuestions(data);
+    game.renderAll()
+    setCallbacks()
 });
 
 const join = (data) => {
@@ -159,44 +224,14 @@ let renderMath = (element) => {
 };
 
 const display = (num, location = document.getElementById("display")) => {
-    location.innerHTML = bbcodeRender(questions[num].statement);
+    location.innerHTML = bbcodeRender(game.questions.getData()[num].statement);
 
     renderMath(location);
 };
 
 renderMath(document.getElementById("display"));
 
-document.getElementById("move_left").onclick = () => {
-    if (!confirm("Are you sure you want to move back?")) {
-        return;
-    }
 
-    cur = Math.max(0, cur - 1);
-
-    socket.emit("clientSwitch", {
-        room: ROOM,
-        cur: cur,
-    });
-};
-
-document.getElementById("move_right").onclick = () => {
-    if (!confirm("Are you sure you want to move forward?")) {
-        return;
-    }
-
-    cur = Math.min(questions.length - 1, cur + 1);
-
-    socket.emit("clientSwitch", {
-        room: ROOM,
-        cur: cur,
-    });
-};
-
-socket.on("clientSwitch", (data) => {
-    display(Number(data.cur));
-    cur = data.cur;
-    prepWindows();
-});
 
 socket.on("startTimer", (data) => {
     startTimer(data.duration, data.start);
@@ -344,7 +379,7 @@ document.getElementById("uploadExample").onclick = () => {
 };
 
 document.getElementById("download").onclick = () => {
-    navigator.clipboard.writeText(JSON.stringify(questions));
+    navigator.clipboard.writeText(JSON.stringify(game.questions.toJSON()));
     alert("Copied to clipboard");
 };
 
@@ -358,7 +393,7 @@ document.getElementById("toggleWaitingRoom").onclick = () => {
 };
 
 document.getElementById("openQuestionEditor").onclick = () => {
-    open(`/creator?data=${encodeURIComponent(JSON.stringify(questions))}`);
+    open(`/creator?data=${encodeURIComponent(JSON.stringify(game.questions.toJSON()))}`);
 };
 
 //update competitor names
@@ -465,7 +500,7 @@ document.getElementById("clearBuzz").onclick = () => {
 document.getElementById("startTimer").onclick = () => {
     socket.emit("startTimer", {
         room: ROOM,
-        cur: cur,
+        cur: game.cur.getData(),
     });
 };
 
@@ -473,7 +508,7 @@ document.getElementById("startTimer").onclick = () => {
 document.getElementById("continueTimer").onclick = () => {
     socket.emit("continueTimer", {
         room: ROOM,
-        cur: cur,
+        cur: game.cur.getData(),
     });
 };
 
@@ -481,7 +516,7 @@ document.getElementById("continueTimer").onclick = () => {
 document.getElementById("endTimer").onclick = () => {
     socket.emit("endTimer", {
         room: ROOM,
-        cur: cur,
+        cur: game.cur.getData(),
     });
     document.getElementById("timer").style.background = "#fff1f2";
     clearInterval(timerInterval);
@@ -489,7 +524,7 @@ document.getElementById("endTimer").onclick = () => {
 };
 
 const prepWindows = () => {
-    document.getElementById("preview").scrollTo(228 * cur, 0);
+    document.getElementById("preview").scrollTo(228 * game.cur.getData(), 0);
 
     let i = 0;
 
@@ -502,52 +537,13 @@ const prepWindows = () => {
                 return;
             }
 
-            cur = j;
-
-            socket.emit("clientSwitch", {
-                room: ROOM,
-                cur: cur,
-            });
+            game.cur.update(j)
         };
 
         i++;
     });
-    document.querySelector(`.window[data-id="${cur}"]`).classList.add("cur");
-};
-
-const prepQuestions = (data) => {
-    roomData = data;
-    for (let user in data.devices) {
-        join({
-            room: ROOM,
-            name: data.devices[user].name,
-            id: user,
-            status: data.devices[user].status,
-        });
-    }
-    questions = data.questions;
-    display(Number(data.cur));
-
-    cur = data.cur;
-
-    for (let i = 0; i < questions.length; i++) {
-        let element = document.createElement("DIV");
-        element.classList.add("window");
-        element.classList.add("pwrapper");
-        element.setAttribute("data-id", i);
-
-        let inner = document.createElement("DIV");
-        inner.classList.add("p");
-
-        element.appendChild(inner);
-        document.getElementById("preview").appendChild(element);
-
-        display(i, inner);
-    }
-
-    prepWindows();
-};
-
+    document.querySelector(`.window[data-id="${game.cur.getData()}"]`).classList.add("cur");
+}
 let timerInterval;
 
 const startTimer = (duration, start) => {
@@ -568,3 +564,73 @@ const startTimer = (duration, start) => {
         }
     }, 10);
 };
+
+
+
+// New framework
+
+const setCallbacks = () => {
+    document.getElementById("move_left").onclick = () => {
+        if (!confirm("Are you sure you want to move back?")) {
+            return;
+        }
+
+        game.cur.update(Math.max(0, game.cur.getData() - 1));
+    };
+
+    document.getElementById("move_right").onclick = () => {
+        if (!confirm("Are you sure you want to move forward?")) {
+            return;
+        }
+
+        game.cur.update(Math.min(game.questions.getData().length - 1, game.cur.getData() + 1));
+    };
+}
+
+class CurProperty extends Property{
+    renderInternal(){
+        console.log(this)
+        display(this.getData());
+        prepWindows();
+    }
+}
+
+class QuestionProperty extends Property{
+    renderInternal(){
+
+        let questions = this.data;
+        console.log(questions, game)
+
+        for (let i = 0; i < questions.length; i++) {
+            let element = document.createElement("DIV");
+            element.classList.add("window");
+            element.classList.add("pwrapper");
+            element.setAttribute("data-id", i);
+
+            let inner = document.createElement("DIV");
+            inner.classList.add("p");
+
+            element.appendChild(inner);
+            document.getElementById("preview").appendChild(element);
+
+            display(i, inner);
+        }
+
+        prepWindows();
+    }
+}
+
+class DeviceProperty extends Property{
+    renderInternal(){
+        document.getElementById("devices_wrapper").innerHTML = ""
+        for (let user in this.data) {
+            console.log(this.data)
+            join({
+                room: this.game.room,
+                name: this.data[user].name,
+                id: user,
+                status: this.data[user].status,
+            });
+        }
+    }
+}

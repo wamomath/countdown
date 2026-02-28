@@ -182,6 +182,17 @@ io.on("connection", (socket) => {
 
         io.to(room).emit("toggleWaitingRoom", ROOMS[room])
     })
+
+    socket.on("roomStateUpdate", (payload) => {
+        let room = payload.room
+        let data = payload.data
+        let identifier = payload.identifier
+
+        ROOMS[room][identifier] = data
+
+
+        io.to(room).emit("roomStateUpdate", payload)
+    })
 });
 
 

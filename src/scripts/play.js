@@ -27,6 +27,68 @@ let competitor2 = false;
 let hasbuzzed = true;
 let hasbuzzedtoggle = false;
 
+let game;
+
+class CountdownGame extends Game{
+    key;
+    devices;
+    questions;
+    timing;
+    waiting;
+    cur;
+
+
+    constructor(room, socket, state){
+        super(room, socket, state);
+        this.key = new Property(this, "devices", {})
+        this.questions = new Property(this, "questions", {})
+        this.timing = new Property(this, "timing", {})
+        this.waiting = new Property(this, "waiting", true)
+        this.cur = new CurProperty(this, "cur")
+        this.devices = new Property(this, "devices", {})
+        this.processState(state, false)
+        socket.on("roomStateUpdate", (data) => {
+            console.log("update", data)
+            let dataState = {}
+            dataState[data.identifier] = data.data
+            this.processState(dataState)
+        });
+    }
+
+    processState(state, render=true){
+        for (let identifier in state){
+            let property = this[identifier];
+            property.updateExternal(state[identifier]);
+        }
+
+        if (render){
+            for (let identifier in state){
+                let property = this[identifier];
+                property.render()
+            }
+        }
+    }
+
+    renderAll() {
+        for (let identifier in this){
+            if (this[identifier].render){
+                this[identifier].render()
+            }
+        }
+    }
+
+    toJSON(){
+        return {
+            key: this.key.toJSON(),
+            devices: this.devices.toJSON(),
+            questions: this.questions.toJSON(),
+            timing: this.timing.toJSON(),
+            waiting: this.waiting.toJSON(),
+            cur: this.cur.toJSON()
+        }
+    }
+}
+
 const bbcodeRender = (code) => {
     code = code
         .replaceAll("<", "&lt;")
@@ -69,6 +131,9 @@ socket.on("clientAccept", (data) => {
     document.getElementById("vsbar").style.display = "flex";
 
     display(Number(data.cur));
+
+    game = new CountdownGame(ROOM, socket, data)
+    game.renderAll()
 });
 
 socket.on("clientSwitch", (data) => {
@@ -79,6 +144,12 @@ socket.on("clientSwitch", (data) => {
     hasbuzzed = false;
     hasbuzzedtoggle = false;
 });
+
+class CurProperty extends Property{
+    renderInternal(){
+        display(Number(this.data));
+    }
+}
 
 socket.on("clientUpload", (data) => {
     if (!accepted) {
