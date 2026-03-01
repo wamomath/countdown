@@ -23,7 +23,8 @@ let ROOMS = {
         timing: {
             start: 0,
             duration: 0,
-            elapsed: 0
+            elapsed: 0,
+            state: "stopped"
         },
         waiting: true,
         cur: 0,
@@ -31,7 +32,16 @@ let ROOMS = {
             competitor1: null,
             competitor2: null
         },
-        competitorNames: {}
+        competitorNames: {},
+        buzzed: {
+            competitor1: false,
+            competitor2: false,
+            lastBuzzer: null
+        },
+        scores: {
+            player1: 0,
+            player2: 0
+        }
     }
 } // Room Name : Room Key
 
@@ -56,7 +66,6 @@ io.on("connection", (socket) => {
     socket.on("adminJoin", (data) => {
         socket.join([data.room, data.room + "_ADMIN"])
         socket.emit("adminJoin", ROOMS[data.room])
-        socket.emit("startTimer", ROOMS[data.room].timing)
 
         ROOMS[data.room].adminList[socket.id] = data.username
         io.to(data.room + "_ADMIN").emit("roomStateUpdate", {
@@ -122,7 +131,6 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("clientAccept", data)
         io.to(id).emit("clientAccept", ROOMS[room])
-        io.to(id).emit("startTimer", ROOMS[room].timing)
 
         ROOMS[room].devices[id].status = true
 
@@ -175,17 +183,6 @@ io.on("connection", (socket) => {
         io.to(room).emit("updateNames", data)
     })
 
-    socket.on("updateScores", (data) => {
-        let room = data.room
-
-        io.to(room).emit("updateScores", data)
-    })
-
-    socket.on("resetScores", (data) => {
-        let room = data.room
-
-        io.to(room).emit("resetScores", data)
-    })
 
     socket.on("assignCompetitors", (data) => {
         let room = data.room
@@ -205,41 +202,6 @@ io.on("connection", (socket) => {
         io.to(room).emit("clearbuzz", data)
     })
 
-    socket.on("pauseTimer", (data) => {
-        let room = data.room
-
-        ROOMS[room].timing.elapsed = ROOMS[room].timing.elapsed + Date.now() - ROOMS[room].timing.start
-
-        io.to(room).emit("pauseTimer", data)
-    })
-
-    socket.on("startTimer", (data) => {
-        let room = data.room
-
-        ROOMS[room].timing.start = Date.now()
-        ROOMS[room].timing.duration = ROOMS[room].questions[data.cur].timeMS
-        ROOMS[room].timing.elapsed = 0
-
-        io.to(room).to(room + "_ADMIN").emit("startTimer", ROOMS[room].timing)
-    })
-
-    socket.on("continueTimer", (data) => {
-        let room = data.room
-
-        ROOMS[room].timing.start = Date.now()
-
-        io.to(room).emit("continueTimer", ROOMS[room].timing)
-    })
-
-    socket.on("endTimer", (data) => {
-        let room = data.room
-
-        ROOMS[room].timing.start = 0
-        ROOMS[room].timing.duration = 0
-        ROOMS[room].timing.elapsed = 0
-
-        io.to(room).emit("endTimer", data)
-    })
 
     socket.on("toggleWaitingRoom", (data) => {
         let room = data.room
@@ -258,6 +220,33 @@ io.on("connection", (socket) => {
 
 
         io.to(room).emit("roomStateUpdate", payload)
+
+        if (identifier === "cur" && ROOMS[room].questions){
+            ROOMS[room]["timing"] = {
+                start: Date.now(),
+                duration: ROOMS[room].questions[Number(data)].timeMS,
+                elapsed: 0,
+                state: "running"
+            }
+
+            ROOMS[room]["buzzed"] = {
+                competitor1: false,
+                competitor2: false,
+                lastBuzzer: null
+            }
+
+            io.to(room).emit("roomStateUpdate", {
+                room: room,
+                identifier: "timing",
+                data: ROOMS[room]["timing"]
+            })
+
+            io.to(room).emit("roomStateUpdate", {
+                room: room,
+                identifier: "buzzed",
+                data: ROOMS[room]["buzzed"]
+            })
+        }
     })
 
     socket.on("adminRoomStateUpdate", (payload) => {

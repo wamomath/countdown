@@ -20,9 +20,6 @@ let curp1score = 0;
 let curp2score = 0;
 
 
-let hasbuzzed = true;
-let hasbuzzedtoggle = false;
-
 let game;
 
 class CountdownGame extends Game{
@@ -33,17 +30,19 @@ class CountdownGame extends Game{
     cur;
     competitor;
     competitorNames;
+    buzzed;
 
 
     constructor(room, socket, state){
         super(room, socket, state);
-        this.key = new Property(this, "devices", {})
+        this.key = new Property(this, "key", {})
         this.questions = new QuestionsProperty(this, "questions", {})
-        this.timing = new Property(this, "timing", {})
+        this.timing = new TimingProperty(this, "timing", {})
         this.waiting = new Property(this, "waiting", true)
         this.cur = new CurProperty(this, "cur")
         this.competitor = new CompetitorProperty(this, "competitor", true)
         this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
+        this.buzzed = new BuzzedProperty(this, "buzzed", { competitor1: false, competitor2: false })
 
         this.processState(state, false)
 
@@ -146,8 +145,6 @@ socket.on("clientSwitch", (data) => {
         return;
     }
     display(Number(data.cur));
-    hasbuzzed = false;
-    hasbuzzedtoggle = false;
 });
 
 class CurProperty extends Property{
@@ -191,13 +188,44 @@ class CompetitorNamesProperty extends Property{
     }
 }
 
-socket.on("startTimer", (data) => {
-    if (!accepted) {
-        return;
+class TimingProperty extends Property{
+    renderInternal(){
+        let data = this.getData();
+        if (data.state === "running") {
+            document.getElementById("favicon").href = "/assets/alarmgreen.svg";
+            document.getElementById("progress").style.backgroundColor = "#5cb85c";
+            document.getElementById("timer").style.backgroundColor = "#020617";
+            let currentElapsed = data.elapsed + (getSyncedServerTime() - data.start);
+            setProgressBar(data.duration, currentElapsed);
+        } else if (data.state === "paused") {
+            document.getElementById("favicon").href = "/assets/alarmred.svg";
+            progressBarCounter++;
+            document.getElementById("progress").style.backgroundColor = "lightgreen";
+            document.getElementById("timer").style.backgroundColor = "lightgreen";
+        } else {
+            document.getElementById("favicon").href = "/assets/alarmred.svg";
+            document.getElementById("progress").style.backgroundColor = "#5cb85c";
+            document.getElementById("timer").style.backgroundColor = "#020617";
+            setProgressBar(0, 0);
+        }
     }
-    setProgressBar(data.duration, getSyncedServerTime() - data.start);
-});
+}
 
+class BuzzedProperty extends Property{
+    renderInternal() {
+        console.log("RENDERING BUZZING", this.data)
+        if (this.data.competitor1){
+            document.getElementById("p1").style.background = "lightgreen";
+        }else{
+            document.getElementById("p1").style.background = "none";
+        }
+        if (this.data.competitor2){
+            document.getElementById("p2").style.background = "lightgreen";
+        }else{
+            document.getElementById("p2").style.background = "none";
+        }
+    }
+}
 
 //socket updates scores and displays them
 socket.on("updateScores", (data) => {
@@ -243,52 +271,12 @@ socket.on("resetScores", (data) => {
 
 
 //upon buzz shade buzzing side
-socket.on("buzz", (data) => {
-    if (data.playernum == 1){
-        document.getElementById("p1").style.backgroundColor = "lightgreen";
-    } else if (data.playernum == 2){
-        document.getElementById("p2").style.backgroundColor = "lightgreen";
-    }
-})
-
 //clearbuzz removes the buzz
 socket.on("clearbuzz", (data) =>{
     document.getElementById("p1").style.backgroundColor = "white";
     document.getElementById("p2").style.backgroundColor = "white";
     document.getElementById("progress").style.backgroundColor = "#5cb85c"
     document.getElementById("timer").style.backgroundColor = "#020617"
-    if (!hasbuzzedtoggle) {
-        hasbuzzed = false;
-    }
-})
-
-//pause animation for timer
-socket.on("pauseTimer", (data) => {
-    document.getElementById("favicon").href = "/assets/alarmred.svg";
-    setProgressBar(0,0);
-    document.getElementById("progress").style.backgroundColor = "lightgreen"
-    document.getElementById("timer").style.backgroundColor = "lightgreen"
-    hasbuzzed = true;
-})
-
-//continue animation for timer
-socket.on("continueTimer", (data) => {
-    document.getElementById("favicon").href = "/assets/alarmgreen.svg";
-    document.getElementById("progress").style.backgroundColor = "#5cb85c"
-    document.getElementById("timer").style.backgroundColor = "#020617"
-    setProgressBar(data.duration, data.elapsed);
-    if (!hasbuzzedtoggle) {
-        hasbuzzed = false;
-    }
-})
-
-//end animation for timer
-socket.on("endTimer", (data) => {
-    document.getElementById("favicon").href = "/assets/alarmred.svg";
-    document.getElementById("progress").style.backgroundColor = "#5cb85c"
-    document.getElementById("timer").style.backgroundColor = "#020617"
-    setProgressBar(0,0);
-    hasbuzzed = true;
 })
 
 //keydown for the buzzers
@@ -296,31 +284,31 @@ document.addEventListener('keydown', function(event) {
     if (!game){
         return;
     }
-    console.log("BUZING AT", event.key === ' ', game.competitor.isCompetitor1(), !hasbuzzed)
-    if (event.key === ' ' && game.competitor.isCompetitor1() && !hasbuzzed){
+    let timing = game.timing.getData();
+    let buzzed = game.buzzed.getData();
+    let timeRemaining = (timing.start + timing.duration - timing.elapsed) - getSyncedServerTime();
+    let canBuzz = timing.state === "running" && timeRemaining > 0;
+
+    if (event.key === ' ' && game.competitor.isCompetitor1() && canBuzz && !buzzed.competitor1){
         console.log("buzzing c1")
         document.getElementById("p1").style.backgroundColor = "lightgreen";
-        socket.emit("buzz", {
-            room: ROOM,
-            playernum: 1
-        })
-        socket.emit("pauseTimer", {
-            room: ROOM
-        })
-        hasbuzzed = true;
-        hasbuzzedtoggle = true;
-    } else if (event.key === ' ' && game.competitor.isCompetitor2() && !hasbuzzed){
+        game.buzzed.update({ competitor1: true, competitor2: buzzed.competitor2, lastBuzzer: 1 });
+        game.timing.update({
+            start: timing.start,
+            duration: timing.duration,
+            elapsed: timing.elapsed + getSyncedServerTime() - timing.start,
+            state: "paused"
+        });
+    } else if (event.key === ' ' && game.competitor.isCompetitor2() && canBuzz && !buzzed.competitor2){
         console.log("buzzing c2")
         document.getElementById("p2").style.backgroundColor = "lightgreen";
-        socket.emit("buzz", {
-            room: ROOM,
-            playernum: 2
-        })
-        socket.emit("pauseTimer", {
-            room: ROOM
-        })
-        hasbuzzed = true
-        hasbuzzedtoggle = true;
+        game.buzzed.update({ competitor1: buzzed.competitor1, competitor2: true, lastBuzzer: 2 });
+        game.timing.update({
+            start: timing.start,
+            duration: timing.duration,
+            elapsed: timing.elapsed + getSyncedServerTime() - timing.start,
+            state: "paused"
+        });
     }
 });
 
@@ -348,17 +336,23 @@ const timeout = (ms) => {
 const setProgressBar = async (durationMS, elapsedTime = 0) => {
     let me = ++progressBarCounter;
     let progressBar = document.getElementById("progress");
-
-    progressBar.animate([{ width: `0px` }, { width: "0px" }], {
+    progressBar.animate([{ width: `0px` }, { width: `0px` }], {
         fill: "forwards",
         duration: 0,
         easing: "linear",
     });
 
+
     progressBar.style.backgroundColor = "#5cb85c";
     let spacing = 25;
     let progressBarWidth = document.getElementById("timer").scrollWidth - 10;
     let offset = (elapsedTime / durationMS) * progressBarWidth;
+
+    progressBar.animate([{ width: `${offset}px` }, { width: `${offset}px` }], {
+        fill: "forwards",
+        duration: 0,
+        easing: "linear",
+    });
 
     document.getElementById("favicon").href = "/assets/alarmgreen.svg";
 
@@ -412,7 +406,6 @@ const setProgressBar = async (durationMS, elapsedTime = 0) => {
 
     progressBar.style.backgroundColor = "#d9534f";
     document.getElementById("favicon").href = "/assets/alarmred.svg";
-    hasbuzzed = true;
 };
 
 window.setProgressBar = setProgressBar;

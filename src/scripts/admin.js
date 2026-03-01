@@ -26,6 +26,7 @@ class CountdownGame extends Game{
     competitor;
     adminList;
     competitorNames;
+    buzzed;
 
 
     constructor(room, socket, state){
@@ -33,12 +34,13 @@ class CountdownGame extends Game{
         this.adminList = new AdminListProperty(this, "adminList", {})
         this.key = new Property(this, "devices", {})
         this.questions = new QuestionProperty(this, "questions", {})
-        this.timing = new Property(this, "timing", {})
+        this.timing = new TimingProperty(this, "timing", {})
         this.waiting = new WaitingProperty(this, "waiting", true)
         this.cur = new CurProperty(this, "cur")
         this.devices = new DeviceProperty(this, "devices", {})
         this.competitor = new CompetitorProperty(this, "competitor", {})
         this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
+        this.buzzed = new BuzzedProperty(this, "buzzed", { competitor1: false, competitor2: false })
 
         this.processState(state, false)
 
@@ -154,29 +156,6 @@ const display = (num, location = document.getElementById("display")) => {
 
 renderMath(document.getElementById("display"));
 
-
-
-socket.on("startTimer", (data) => {
-    startTimer(data.duration, data.start);
-});
-
-socket.on("pauseTimer", (data) => {
-    document.getElementById("timer").style.background = "#fff1f2";
-    clearInterval(timerInterval);
-});
-
-socket.on("continueTimer", (data) => {
-    startTimer(data.duration, getSyncedServerTime() - data.elapsed);
-});
-
-//upon buzz shade buzzing side
-socket.on("buzz", (data) => {
-    if (data.playernum == 1) {
-        document.getElementById("p1").style.backgroundColor = "lightgreen";
-    } else if (data.playernum == 2) {
-        document.getElementById("p2").style.backgroundColor = "lightgreen";
-    }
-});
 
 document.getElementById("upload").onclick = () => {
     let code = prompt("Please upload the JSON list of your problems");
@@ -320,33 +299,48 @@ document.getElementById("updateNames").onclick = () => {
     });
 };
 
-//player 1 scores
-document.getElementById("player1score").onclick = () => {
-    if (!confirm("Are you sure Player 1 has just scored a point?")) {
+//mark answer correct - scores the player who last buzzed
+document.getElementById("markCorrect").onclick = () => {
+    let buzzed = game.buzzed.getData();
+    if (!buzzed.lastBuzzer) {
         return;
     }
+    let playernum = buzzed.lastBuzzer;
     socket.emit("updateScores", {
         room: ROOM,
-        playernum: 1,
+        playernum: playernum,
     });
-    curp1score = curp1score + 1;
-    document.getElementById(`bar1${curp1score}`).style.backgroundColor =
-        "#5cb85c";
-    document.getElementById(`bar1${curp1score}`).style.color = "#5cb85c";
+    if (playernum === 1) {
+        curp1score = curp1score + 1;
+        document.getElementById(`bar1${curp1score}`).style.backgroundColor = "#5cb85c";
+        document.getElementById(`bar1${curp1score}`).style.color = "#5cb85c";
+    } else {
+        curp2score = curp2score + 1;
+        document.getElementById(`bar2${curp2score}`).style.backgroundColor = "#5cb85c";
+        document.getElementById(`bar2${curp2score}`).style.color = "#5cb85c";
+    }
+    // Clear buzz
+    document.getElementById("p1").style.backgroundColor = "white";
+    document.getElementById("p2").style.backgroundColor = "white";
+    socket.emit("clearbuzz", { room: ROOM });
 };
-//player 2 scores
-document.getElementById("player2score").onclick = () => {
-    if (!confirm("Are you sure Player 2 has just scored a point?")) {
-        return;
+
+//mark answer incorrect - no point, clear buzz and continue timer
+document.getElementById("markIncorrect").onclick = () => {
+    // Clear buzz
+    document.getElementById("p1").style.backgroundColor = "white";
+    document.getElementById("p2").style.backgroundColor = "white";
+    socket.emit("clearbuzz", { room: ROOM });
+    // Continue timer so the other player can buzz
+    let timing = game.timing.getData();
+    if (timing.state === "paused") {
+        game.timing.update({
+            start: getSyncedServerTime(),
+            duration: timing.duration,
+            elapsed: timing.elapsed,
+            state: "running"
+        });
     }
-    socket.emit("updateScores", {
-        room: ROOM,
-        playernum: 2,
-    });
-    curp2score = curp2score + 1;
-    document.getElementById(`bar2${curp2score}`).style.backgroundColor =
-        "#5cb85c";
-    document.getElementById(`bar2${curp2score}`).style.color = "#5cb85c";
 };
 
 //scores are reset
@@ -380,32 +374,6 @@ document.getElementById("clearBuzz").onclick = () => {
     socket.emit("clearbuzz", { room: ROOM });
 };
 
-// //start timer upon click
-document.getElementById("startTimer").onclick = () => {
-    socket.emit("startTimer", {
-        room: ROOM,
-        cur: game.cur.getData(),
-    });
-};
-
-//continue timer upon click
-document.getElementById("continueTimer").onclick = () => {
-    socket.emit("continueTimer", {
-        room: ROOM,
-        cur: game.cur.getData(),
-    });
-};
-
-//end timer upon click
-document.getElementById("endTimer").onclick = () => {
-    socket.emit("endTimer", {
-        room: ROOM,
-        cur: game.cur.getData(),
-    });
-    document.getElementById("timer").style.background = "#fff1f2";
-    clearInterval(timerInterval);
-    document.getElementById("timer").innerText = "0.00";
-};
 
 const prepWindows = () => {
     document.getElementById("preview").scrollTo(228 * game.cur.getData(), 0);
@@ -444,6 +412,14 @@ const startTimer = (duration, start) => {
 
         if (target < getSyncedServerTime()) {
             document.getElementById("timer").style.background = "#fff1f2";
+
+            game.timing.update({
+                start: 0,
+                duration: 0,
+                elapsed: 0,
+                state: "stopped"
+            });
+
             clearInterval(timerInterval);
         }
     }, 10);
@@ -469,6 +445,69 @@ const setCallbacks = () => {
 
         game.cur.update(Math.min(game.questions.getData().length - 1, game.cur.getData() + 1));
     };
+
+    document.getElementById("startTimer").onclick = () => {
+        game.timing.update({
+            start: game.getTime(),
+            duration: game.questions.getData()[game.cur.getData()].timeMS,
+            elapsed: 0,
+            state: "running"
+        });
+    };
+
+    document.getElementById("continueTimer").onclick = () => {
+        let timing = game.timing.getData();
+        if (timing.state === "paused") {
+            game.timing.update({
+                start: game.getTime(),
+                duration: timing.duration,
+                elapsed: timing.elapsed,
+                state: "running"
+            });
+        }else if (timing.state === "stopped"){
+            game.timing.update({
+                start: game.getTime(),
+                duration: game.questions.getData()[game.cur.getData()].timeMS,
+                elapsed: 0,
+                state: "running"
+            });
+        }else{
+            game.timing.update({
+                start: timing.start,
+                duration: timing.duration,
+                elapsed: timing.elapsed + getSyncedServerTime() - timing.start,
+                state: "paused"
+            });
+        }
+    };
+
+    document.getElementById("endTimer").onclick = () => {
+        game.timing.update({
+            start: 0,
+            duration: 0,
+            elapsed: 0,
+            state: "stopped"
+        });
+    };
+}
+
+class TimingProperty extends Property{
+    renderInternal(){
+        let data = this.getData();
+        if (data.state === "running") {
+            startTimer(data.duration - data.elapsed, data.start);
+            document.querySelector("#continueTimer i").className = "fa-solid fa-circle-pause"
+        } else if (data.state === "paused") {
+            document.getElementById("timer").style.background = "#fff1f2";
+            clearInterval(timerInterval);
+            document.querySelector("#continueTimer i").className = "fa-solid fa-circle-play"
+        } else {
+            document.getElementById("timer").style.background = "#fff1f2";
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = "0.00";
+            document.querySelector("#continueTimer i").className = "fa-solid fa-circle-play"
+        }
+    }
 }
 
 class CurProperty extends Property{
@@ -661,5 +700,21 @@ class CompetitorNamesProperty extends Property{
         document.getElementById("p1name").innerHTML = `[${this.data.seed1}] ${this.data.name1}`;
         document.getElementById("p2name").innerHTML = `${this.data.name2} [${this.data.seed2}]`;
 
+    }
+}
+
+class BuzzedProperty extends Property{
+    renderInternal() {
+        console.log("RENDERING BUZZING")
+        if (this.data.competitor1){
+            document.getElementById("p1").style.background = "lightgreen";
+        }else{
+            document.getElementById("p1").style.background = "none";
+        }
+        if (this.data.competitor2){
+            document.getElementById("p2").style.background = "lightgreen";
+        }else{
+            document.getElementById("p2").style.background = "none";
+        }
     }
 }
