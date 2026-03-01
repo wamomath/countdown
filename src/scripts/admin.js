@@ -24,7 +24,8 @@ class CountdownGame extends Game{
     waiting;
     cur;
     competitor;
-    adminList
+    adminList;
+    competitorNames;
 
 
     constructor(room, socket, state){
@@ -37,7 +38,10 @@ class CountdownGame extends Game{
         this.cur = new CurProperty(this, "cur")
         this.devices = new DeviceProperty(this, "devices", {})
         this.competitor = new CompetitorProperty(this, "competitor", {})
+        this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
+
         this.processState(state, false)
+
         socket.on("roomStateUpdate", (data) => {
             console.log("update", data)
             let dataState = {}
@@ -307,17 +311,13 @@ document.getElementById("updateNames").onclick = () => {
     if (!confirm("Are you sure these updated names are correct?")) {
         return;
     }
-    socket.emit("updateNames", {
-        room: ROOM,
-        competitor1: document.getElementById("competitor1").value,
-        competitor2: document.getElementById("competitor2").value,
-        c1seed: document.getElementById("c1seed").value,
-        c2seed: document.getElementById("c2seed").value,
+    //socket.emit("updateNames", {
+    game.competitorNames.update({
+        name1: document.getElementById("competitor1").value,
+        name2: document.getElementById("competitor2").value,
+        seed1: document.getElementById("c1seed").value,
+        seed2: document.getElementById("c2seed").value
     });
-    document.getElementById("p1name").innerHTML =
-        `[${document.getElementById("c1seed").value}] ${document.getElementById("competitor1").value}`;
-    document.getElementById("p2name").innerHTML =
-        `${document.getElementById("competitor2").value} [${document.getElementById("c2seed").value}]`;
 };
 
 //player 1 scores
@@ -380,7 +380,7 @@ document.getElementById("clearBuzz").onclick = () => {
     socket.emit("clearbuzz", { room: ROOM });
 };
 
-//start timer upon click
+// //start timer upon click
 document.getElementById("startTimer").onclick = () => {
     socket.emit("startTimer", {
         room: ROOM,
@@ -653,5 +653,13 @@ class CompetitorProperty extends Property{
     updateCompetitor2(id){
         this.data.competitor2 = id
         this.update(this.data)
+    }
+}
+
+class CompetitorNamesProperty extends Property{
+    renderInternal() {
+        document.getElementById("p1name").innerHTML = `[${this.data.seed1}] ${this.data.name1}`;
+        document.getElementById("p2name").innerHTML = `${this.data.name2} [${this.data.seed2}]`;
+
     }
 }

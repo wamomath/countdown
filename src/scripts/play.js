@@ -32,6 +32,7 @@ class CountdownGame extends Game{
     waiting;
     cur;
     competitor;
+    competitorNames;
 
 
     constructor(room, socket, state){
@@ -42,7 +43,10 @@ class CountdownGame extends Game{
         this.waiting = new Property(this, "waiting", true)
         this.cur = new CurProperty(this, "cur")
         this.competitor = new CompetitorProperty(this, "competitor", true)
+        this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
+
         this.processState(state, false)
+
         socket.on("roomStateUpdate", (data) => {
             console.log("update", data)
             let dataState = {}
@@ -130,7 +134,7 @@ socket.on("clientAccept", (data) => {
     document.getElementById("timer").style.display = "block";
     document.getElementById("vsbar").style.display = "flex";
 
-    console.log("RECEIVING DATA")
+    console.log("RECEIVING DATA", data)
 
     game = new CountdownGame(ROOM, socket, data)
     window.game = game
@@ -162,6 +166,7 @@ class CompetitorProperty extends Property{
     renderInternal() {
         document.querySelector("footer").classList.remove("one")
         document.querySelector("footer").classList.remove("two")
+        console.log(this.isCompetitor1(), this.isCompetitor2(), this.data)
         if (this.isCompetitor1()){
             document.querySelector("footer").classList.add("one")
         }else if (this.isCompetitor2()){
@@ -178,6 +183,14 @@ class CompetitorProperty extends Property{
     }
 }
 
+class CompetitorNamesProperty extends Property{
+    renderInternal() {
+        document.getElementById("p1name").innerHTML = `[${this.data.seed1}] ${this.data.name1}`;
+        document.getElementById("p2name").innerHTML = `${this.data.name2} [${this.data.seed2}]`;
+
+    }
+}
+
 socket.on("startTimer", (data) => {
     if (!accepted) {
         return;
@@ -185,14 +198,6 @@ socket.on("startTimer", (data) => {
     setProgressBar(data.duration, getSyncedServerTime() - data.start);
 });
 
-//socket updates names and displays them
-socket.on("updateNames", (data) => {
-    //if (!accepted){return} commented because the text should still change
-    document.getElementById("p1name").innerHTML =
-        `[${data.c1seed}] ${data.competitor1}`;
-    document.getElementById("p2name").innerHTML =
-        `${data.competitor2} [${data.c2seed}]`;
-});
 
 //socket updates scores and displays them
 socket.on("updateScores", (data) => {

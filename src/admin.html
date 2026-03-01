@@ -75,12 +75,6 @@
                 <br>
             </div>
             <br>
-            <button class="action" id="clearBuzz">Clear Buzz</button>
-            <button class="action" id="startTimer">Start Timer</button>
-            <button class="action" id="continueTimer">Continue Timer</button>
-            <button class="action" id="endTimer">End Timer</button>
-            <br>
-            <br>
             <div id="vsbar">
                 <div class="competitor left" id="p1">
                     <div class="competitior_name" id="p1name">Set competitor names</div>
@@ -101,8 +95,19 @@
                     </div>
                 </div>
             </div>
+            <button class="action" id="clearBuzz">Clear Buzz</button>
+
             <br>
-            <div id="timer">0:00:45.00</div>
+            <div id="timer_wrapper">
+                <div class="left">
+                    <div id="timer">0:00:45.00</div>
+                </div>
+                <div class="right">
+                    <button class="action" id="startTimer"><i class="fa-solid fa-angles-left"></i></button>
+                    <button class="action" id="continueTimer"><i class="fa-solid fa-circle-pause"></i></button>
+                    <button class="action" id="endTimer"><i class="fa-solid fa-angles-right"></i></button>
+                </div>
+            </div>
         </div>
         <div id="devices">
             <h1>Devices Connected</h1>
@@ -127,7 +132,7 @@
             <button class="action" id="upload">Upload Question Set</button>
             <button class="action" id="download">Copy Question Set</button>
             <button class="action" id="uploadExample">Try Example Set (Latest AIME)</button>
-            <button class="action" id="toggleWaitingRoom">Xooks Rbo 1434 Waiting Room</button>
+            <button class="action" id="toggleWaitingRoom">Waiting Room</button>
             <button class="action" id="openQuestionEditor">Open Question Creator</button>
         </div>
     </aside>

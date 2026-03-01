@@ -30,7 +30,8 @@ let ROOMS = {
         competitor: {
             competitor1: null,
             competitor2: null
-        }
+        },
+        competitorNames: {}
     }
 } // Room Name : Room Key
 
@@ -120,10 +121,7 @@ io.on("connection", (socket) => {
         let room = data.room
 
         io.to(room + "_ADMIN").emit("clientAccept", data)
-        io.to(id).emit("clientAccept", {
-            questions: ROOMS[room].questions,
-            cur: ROOMS[room].cur
-        })
+        io.to(id).emit("clientAccept", ROOMS[room])
         io.to(id).emit("startTimer", ROOMS[room].timing)
 
         ROOMS[room].devices[id].status = true
