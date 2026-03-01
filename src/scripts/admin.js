@@ -10,8 +10,6 @@ const ROOM = PARAMS.get("room").toUpperCase();
 const socket = io();
 
 const htmlCore = core(presetHTML5());
-let curp1score = 0;
-let curp2score = 0;
 let elementtemp = "";
 
 let game;
@@ -27,6 +25,7 @@ class CountdownGame extends Game{
     adminList;
     competitorNames;
     buzzed;
+    scores;
 
 
     constructor(room, socket, state){
@@ -41,6 +40,7 @@ class CountdownGame extends Game{
         this.competitor = new CompetitorProperty(this, "competitor", {})
         this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
         this.buzzed = new BuzzedProperty(this, "buzzed", { competitor1: false, competitor2: false })
+        this.scores = new ScoresProperty(this, "scores", { player1: 0, player2: 0 })
 
         this.processState(state, false)
 
@@ -112,9 +112,6 @@ socket.on("adminJoin", (data) => {
     game = new CountdownGame(ROOM, socket, data)
     window.game = game
 
-    document.getElementById("toggleWaitingRoom").innerHTML =
-        `${["Enable", "Disable"][Number(game.waiting.getData())]} Waiting Room`;
-
     document.getElementById("devices_wrapper").innerHTML = "";
     document.getElementById("status").innerHTML = `ID: ${socket.id}`;
     document.getElementById("name").innerHTML = `REGISTERED AS ${USERNAME}`;
@@ -157,22 +154,22 @@ const display = (num, location = document.getElementById("display")) => {
 renderMath(document.getElementById("display"));
 
 
-document.getElementById("upload").onclick = () => {
-    let code = prompt("Please upload the JSON list of your problems");
+document.getElementById("upload").onclick = async () => {
+    let code = await Prompts.prompt("Please upload the JSON list of your problems");
     try {
         JSON.parse(code);
     } catch {
-        alert("Invalid JSON. Please try again");
+        await Prompts.alert("Invalid JSON. Please try again");
         return;
     }
 
     if (JSON.parse(code).constructor !== Array) {
-        alert("JSON is not a list");
+        await Prompts.alert("JSON is not a list");
         return;
     }
 
     if (JSON.parse(code).length === 0) {
-        alert("Please upload questions, not an empty list");
+        await Prompts.alert("Please upload questions, not an empty list");
         return;
     }
 
@@ -180,8 +177,8 @@ document.getElementById("upload").onclick = () => {
     game.cur.update(0)
 };
 
-document.getElementById("uploadExample").onclick = () => {
-    if (!confirm("Are you sure you want to upload an example question set?")) {
+document.getElementById("uploadExample").onclick = async () => {
+    if (!await Prompts.confirm("Are you sure you want to upload an example question set?")) {
         return;
     }
     game.questions.update(
@@ -272,9 +269,9 @@ document.getElementById("uploadExample").onclick = () => {
     game.cur.update(0)
 };
 
-document.getElementById("download").onclick = () => {
+document.getElementById("download").onclick = async () => {
     navigator.clipboard.writeText(JSON.stringify(game.questions.toJSON()));
-    alert("Copied to clipboard");
+    await Prompts.alert("Copied to clipboard");
 };
 
 document.getElementById("toggleWaitingRoom").onclick = () => {
@@ -285,9 +282,18 @@ document.getElementById("openQuestionEditor").onclick = () => {
     open(`/creator?data=${encodeURIComponent(JSON.stringify(game.questions.toJSON()))}`);
 };
 
+let spectatorsHidden = false;
+document.getElementById("toggleSpectators").onclick = () => {
+    spectatorsHidden = !spectatorsHidden;
+    document.getElementById("toggleSpectators").innerHTML = "<i class=\"fa-solid fa-binoculars\"></i> " + (spectatorsHidden ? "Show Spectators" : "Hide Spectators");
+    document.querySelectorAll(".user_type.spectator").forEach(el => {
+        el.closest(".user_wrapper").style.display = spectatorsHidden ? "none" : "";
+    });
+};
+
 //update competitor names
-document.getElementById("updateNames").onclick = () => {
-    if (!confirm("Are you sure these updated names are correct?")) {
+document.getElementById("updateNames").onclick = async () => {
+    if (!await Prompts.confirm("Are you sure these updated names are correct?")) {
         return;
     }
     //socket.emit("updateNames", {
@@ -302,35 +308,40 @@ document.getElementById("updateNames").onclick = () => {
 //mark answer correct - scores the player who last buzzed
 document.getElementById("markCorrect").onclick = () => {
     let buzzed = game.buzzed.getData();
-    if (!buzzed.lastBuzzer) {
-        return;
-    }
-    let playernum = buzzed.lastBuzzer;
-    socket.emit("updateScores", {
-        room: ROOM,
-        playernum: playernum,
-    });
-    if (playernum === 1) {
-        curp1score = curp1score + 1;
-        document.getElementById(`bar1${curp1score}`).style.backgroundColor = "#5cb85c";
-        document.getElementById(`bar1${curp1score}`).style.color = "#5cb85c";
+    if (!buzzed.lastBuzzer) return;
+    let scores = game.scores.getData();
+    console.log(scores)
+    if (buzzed.lastBuzzer === 1) {
+        game.scores.update({ player1: scores.player1 + 1, player2: scores.player2 });
     } else {
-        curp2score = curp2score + 1;
-        document.getElementById(`bar2${curp2score}`).style.backgroundColor = "#5cb85c";
-        document.getElementById(`bar2${curp2score}`).style.color = "#5cb85c";
+        game.scores.update({ player1: scores.player1, player2: scores.player2 + 1 });
     }
-    // Clear buzz
-    document.getElementById("p1").style.backgroundColor = "white";
-    document.getElementById("p2").style.backgroundColor = "white";
-    socket.emit("clearbuzz", { room: ROOM });
+
+    game.buzzed.update({ competitor1: game.buzzed.getData().competitor1, competitor2: game.buzzed.getData().competitor2, lastBuzzer: null });
+
+    game.timing.update({
+        start: 0,
+        duration: 0,
+        elapsed: 0,
+        state: "stopped"
+    });
 };
 
 //mark answer incorrect - no point, clear buzz and continue timer
 document.getElementById("markIncorrect").onclick = () => {
-    // Clear buzz
-    document.getElementById("p1").style.backgroundColor = "white";
-    document.getElementById("p2").style.backgroundColor = "white";
-    socket.emit("clearbuzz", { room: ROOM });
+    game.buzzed.update({ competitor1: game.buzzed.getData().competitor1, competitor2: game.buzzed.getData().competitor2, lastBuzzer: null });
+
+    if (game.buzzed.getData().competitor1 && game.buzzed.getData().competitor2){
+        game.timing.update({
+            start: 0,
+            duration: 0,
+            elapsed: 0,
+            state: "stopped"
+        });
+
+        return;
+    }
+
     // Continue timer so the other player can buzz
     let timing = game.timing.getData();
     if (timing.state === "paused") {
@@ -343,40 +354,41 @@ document.getElementById("markIncorrect").onclick = () => {
     }
 };
 
+document.getElementById("overridescores").onclick = async () => {
+    let score1 = await Prompts.prompt(`New Score for ${game.competitorNames.getData().name1} (Current Score: ${game.scores.getData().player1})`)
+    let score2 = await Prompts.prompt(`New Score for ${game.competitorNames.getData().name2} (Current Score: ${game.scores.getData().player1})`)
+
+    if (isNaN(Number(score1)) || isNaN(Number(score2))){
+        await Prompts.alert("Incorrect Formatting")
+    }
+    if (!(0<=Number(score1) && Number(score2)<= 3 && 0<=Number(score2) && Number(score2) <=3)){
+        await Prompts.alert("Scores must be between 0 and 3 inclusive")
+    }
+
+    game.scores.update({
+        player1: Number(score1),
+        player2: Number(score2)
+    })
+}
+
 //scores are reset
-document.getElementById("resetscores").onclick = () => {
-    if (!confirm("Are you sure the match is over?")) {
+document.getElementById("resetscores").onclick = async () => {
+    if (!await Prompts.confirm("Are you sure the match is over?")) {
         return;
     }
-    socket.emit("resetScores", {
-        room: ROOM,
-    });
-    document.getElementById("bar11").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar12").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar13").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar21").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar22").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar23").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar11").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar12").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar13").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar21").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar22").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
+    game.scores.update({ player1: 0, player2: 0 });
 };
 
 //competitor computers are set
 
 //clears buzz
 document.getElementById("clearBuzz").onclick = () => {
-    document.getElementById("p1").style.backgroundColor = "white";
-    document.getElementById("p2").style.backgroundColor = "white";
-    socket.emit("clearbuzz", { room: ROOM });
+    game.buzzed.update({ competitor1: false, competitor2: false, lastBuzzer: null });
 };
 
 
 const prepWindows = () => {
-    document.getElementById("preview").scrollTo(228 * game.cur.getData(), 0);
+    document.getElementById("preview").scrollTo(270 * game.cur.getData(), 0);
 
     let i = 0;
 
@@ -384,8 +396,8 @@ const prepWindows = () => {
         e.classList.remove("cur");
 
         let j = i;
-        e.onclick = () => {
-            if (!confirm("Are you sure you want to move to slide " + j + "?")) {
+        e.onclick = async () => {
+            if (!await Prompts.confirm("Are you sure you want to move to slide " + j + "?")) {
                 return;
             }
 
@@ -404,6 +416,7 @@ const startTimer = (duration, start) => {
     clearInterval(timerInterval);
 
     document.getElementById("timer").style.background = "#d1fae5";
+    document.getElementById("timer").innerText = (Math.max(0, target - getSyncedServerTime()) / 1000).toFixed(2);
 
     timerInterval = setInterval(() => {
         document.getElementById("timer").innerText = (
@@ -430,16 +443,16 @@ const startTimer = (duration, start) => {
 // New framework
 
 const setCallbacks = () => {
-    document.getElementById("move_left").onclick = () => {
-        if (!confirm("Are you sure you want to move back?")) {
+    document.getElementById("move_left").onclick = async () => {
+        if (!await Prompts.confirm("Are you sure you want to move back?")) {
             return;
         }
 
         game.cur.update(Math.max(0, game.cur.getData() - 1));
     };
 
-    document.getElementById("move_right").onclick = () => {
-        if (!confirm("Are you sure you want to move forward?")) {
+    document.getElementById("move_right").onclick = async () => {
+        if (!await Prompts.confirm("Are you sure you want to move forward?")) {
             return;
         }
 
@@ -498,6 +511,7 @@ class TimingProperty extends Property{
             startTimer(data.duration - data.elapsed, data.start);
             document.querySelector("#continueTimer i").className = "fa-solid fa-circle-pause"
         } else if (data.state === "paused") {
+            document.getElementById("timer").innerText = ((data.duration - data.elapsed) / 1000).toFixed(2);
             document.getElementById("timer").style.background = "#fff1f2";
             clearInterval(timerInterval);
             document.querySelector("#continueTimer i").className = "fa-solid fa-circle-play"
@@ -535,7 +549,19 @@ class QuestionProperty extends Property{
             inner.classList.add("p");
 
             element.appendChild(inner);
-            document.getElementById("preview").appendChild(element);
+
+
+            let wrapper = document.createElement("DIV");
+            wrapper.classList.add("pwindow_wrapper")
+
+            let text = document.createElement("DIV")
+            text.classList.add("pwindow_info")
+            text.innerHTML = `Slide ${i} | ${questions[i].timeMS / 1000} s`
+
+            wrapper.appendChild(element)
+            wrapper.appendChild(text)
+
+            document.getElementById("preview").appendChild(wrapper);
 
             display(i, inner);
         }
@@ -588,6 +614,10 @@ class DeviceProperty extends AdminProperty{
 
         document.getElementById("devices_wrapper").appendChild(template);
 
+        if (spectatorsHidden && type === 0) {
+            document.getElementById(`USER_${data.id}`).style.display = "none";
+        }
+
         document.querySelectorAll(".accept, .deny").forEach((e) => {
             e.onclick = () => {
                 let id = e.getAttribute("data-id");
@@ -608,15 +638,16 @@ class DeviceProperty extends AdminProperty{
             };
         });
 
-        document.querySelector(".user_wrapper:last-of-type .device").onclick = (
+        document.querySelector(".user_wrapper:last-of-type .device").onclick = async (
             e,
         ) => {
-            if (!confirm("Are you sure you want to kick this user?")) {
+            let id = e.currentTarget.getAttribute("data-id");
+            if (!await Prompts.confirm("Are you sure you want to kick this user?")) {
                 return;
             }
             socket.emit("clientDeny", {
                 room: ROOM,
-                id: e.currentTarget.getAttribute("data-id"),
+                id: id,
             });
 
         };
@@ -659,7 +690,7 @@ class DeviceProperty extends AdminProperty{
 class WaitingProperty extends Property{
     renderInternal() {
         document.getElementById("toggleWaitingRoom").innerHTML =
-            `${["Enable", "Disable"][Number(this.data)]} Waiting Room`;
+            `<i class="fa-solid fa-hourglass-end"></i> ${["Enable", "Disable"][Number(this.data)]} Waiting Room`;
     }
 }
 
@@ -707,14 +738,30 @@ class BuzzedProperty extends Property{
     renderInternal() {
         console.log("RENDERING BUZZING")
         if (this.data.competitor1){
-            document.getElementById("p1").style.background = "lightgreen";
+            document.getElementById("p1").style.background = (this.data.lastBuzzer === 1 ? "lightgreen" : "#e2e8f0");
         }else{
             document.getElementById("p1").style.background = "none";
         }
         if (this.data.competitor2){
-            document.getElementById("p2").style.background = "lightgreen";
+            document.getElementById("p2").style.background = (this.data.lastBuzzer === 2 ? "lightgreen" : "#e2e8f0");
         }else{
             document.getElementById("p2").style.background = "none";
+        }
+        let hasLastBuzzer = !!this.data.lastBuzzer;
+        document.getElementById("markCorrect").disabled = !hasLastBuzzer;
+        document.getElementById("markIncorrect").disabled = !hasLastBuzzer;
+        document.getElementById("clearBuzz").disabled = !(this.data.competitor1 || this.data.competitor2);
+    }
+}
+
+class ScoresProperty extends Property{
+    renderInternal() {
+        let scores = this.data;
+        for (let i = 1; i <= 3; i++){
+            document.getElementById(`bar1${i}`).style.backgroundColor = i <= scores.player1 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar1${i}`).style.color = i <= scores.player1 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar2${i}`).style.backgroundColor = i <= scores.player2 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar2${i}`).style.color = i <= scores.player2 ? "#5cb85c" : "rgb(217, 83, 79)";
         }
     }
 }

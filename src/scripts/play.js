@@ -16,11 +16,12 @@ let progressBarCounter = 0;
 
 let accepted = false;
 
-let curp1score = 0;
-let curp2score = 0;
-
-
 let game;
+
+const buzz1 = new Audio('assets/buzzerlow.mp3');
+const buzz2 = new Audio('assets/buzzerhigh.mp3');
+
+window.buzz1 = buzz1; window.buzz2 = buzz2
 
 class CountdownGame extends Game{
     key;
@@ -31,6 +32,7 @@ class CountdownGame extends Game{
     competitor;
     competitorNames;
     buzzed;
+    scores;
 
 
     constructor(room, socket, state){
@@ -43,6 +45,7 @@ class CountdownGame extends Game{
         this.competitor = new CompetitorProperty(this, "competitor", true)
         this.competitorNames = new CompetitorNamesProperty(this, "competitorNames", {})
         this.buzzed = new BuzzedProperty(this, "buzzed", { competitor1: false, competitor2: false })
+        this.scores = new ScoresProperty(this, "scores", { player1: 0, player2: 0 })
 
         this.processState(state, false)
 
@@ -213,71 +216,32 @@ class TimingProperty extends Property{
 
 class BuzzedProperty extends Property{
     renderInternal() {
-        console.log("RENDERING BUZZING", this.data)
+        console.log("RENDERING BUZZING")
         if (this.data.competitor1){
-            document.getElementById("p1").style.background = "lightgreen";
+            document.getElementById("p1").style.background = (this.data.lastBuzzer === 1 ? "lightgreen" : "#e2e8f0");
         }else{
             document.getElementById("p1").style.background = "none";
         }
         if (this.data.competitor2){
-            document.getElementById("p2").style.background = "lightgreen";
+            document.getElementById("p2").style.background = (this.data.lastBuzzer === 2 ? "lightgreen" : "#e2e8f0");
         }else{
             document.getElementById("p2").style.background = "none";
         }
+        let hasLastBuzzer = !!this.data.lastBuzzer;
     }
 }
 
-//socket updates scores and displays them
-socket.on("updateScores", (data) => {
-    if (!accepted) {
-        return;
+class ScoresProperty extends Property{
+    renderInternal() {
+        let scores = this.data;
+        for (let i = 1; i <= 3; i++){
+            document.getElementById(`bar1${i}`).style.backgroundColor = i <= scores.player1 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar1${i}`).style.color = i <= scores.player1 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar2${i}`).style.backgroundColor = i <= scores.player2 ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar2${i}`).style.color = i <= scores.player2 ? "#5cb85c" : "rgb(217, 83, 79)";
+        }
     }
-    let playernum = data.playernum;
-    if (playernum == 1) {
-        curp1score = curp1score + 1;
-        document.getElementById(`bar1${curp1score}`).style.backgroundColor =
-            "#5cb85c";
-        document.getElementById(`bar1${curp1score}`).style.color = "#5cb85c";
-    } else if (playernum == 2) {
-        curp2score = curp2score + 1;
-        document.getElementById(`bar2${curp2score}`).style.backgroundColor =
-            "#5cb85c";
-        document.getElementById(`bar2${curp2score}`).style.color = "#5cb85c";
-    } else {
-        console.log("what the hell is going on");
-    }
-});
-
-//socket sets scores to 0
-socket.on("resetScores", (data) => {
-    if (!accepted) {
-        return;
-    }
-    document.getElementById("bar11").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar12").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar13").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar21").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar22").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar23").style.backgroundColor = "rgb(217, 83, 79)";
-    document.getElementById("bar11").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar12").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar13").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar21").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar22").style.color = "rgb(217, 83, 79)";
-    document.getElementById("bar23").style.color = "rgb(217, 83, 79)";
-    curp1score = 0;
-    curp2score = 0;
-});
-
-
-//upon buzz shade buzzing side
-//clearbuzz removes the buzz
-socket.on("clearbuzz", (data) =>{
-    document.getElementById("p1").style.backgroundColor = "white";
-    document.getElementById("p2").style.backgroundColor = "white";
-    document.getElementById("progress").style.backgroundColor = "#5cb85c"
-    document.getElementById("timer").style.backgroundColor = "#020617"
-})
+}
 
 //keydown for the buzzers
 document.addEventListener('keydown', function(event) {
@@ -291,6 +255,7 @@ document.addEventListener('keydown', function(event) {
 
     if (event.key === ' ' && game.competitor.isCompetitor1() && canBuzz && !buzzed.competitor1){
         console.log("buzzing c1")
+        buzz1.play()
         document.getElementById("p1").style.backgroundColor = "lightgreen";
         game.buzzed.update({ competitor1: true, competitor2: buzzed.competitor2, lastBuzzer: 1 });
         game.timing.update({
@@ -301,6 +266,7 @@ document.addEventListener('keydown', function(event) {
         });
     } else if (event.key === ' ' && game.competitor.isCompetitor2() && canBuzz && !buzzed.competitor2){
         console.log("buzzing c2")
+        buzz2.play()
         document.getElementById("p2").style.backgroundColor = "lightgreen";
         game.buzzed.update({ competitor1: buzzed.competitor1, competitor2: true, lastBuzzer: 2 });
         game.timing.update({

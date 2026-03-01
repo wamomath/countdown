@@ -66,15 +66,13 @@
                     <option value="11">11</option>
                     <option value="12">12</option>
                 </select>
-                <br>
-                <button class="action" id="updateNames">Update Names</button>
-                <button class="action" id="markCorrect">Mark Correct</button>
-                <button class="action" id="markIncorrect">Mark Incorrect</button>
-                <button class="action" id="resetscores">Reset Scores</button>
-                <br>
-                <br>
-            </div>
-            <br>
+                <div id="score_wrapper">
+                    <button class="action" id="updateNames"><i class="fa-solid fa-id-badge"></i> Update Names</button>
+                    <button class="action" id="resetscores"><i class="fa-solid fa-rotate-left"></i> Reset Scores</button>
+                    <button class="action" id="overridescores"><i class="fa-solid fa-pen-to-square"></i> Override Scores</button>
+
+                </div>
+                </div>
             <div id="vsbar">
                 <div class="competitor left" id="p1">
                     <div class="competitior_name" id="p1name">Set competitor names</div>
@@ -95,9 +93,11 @@
                     </div>
                 </div>
             </div>
-            <button class="action" id="clearBuzz">Clear Buzz</button>
-
-            <br>
+            <div id="buzzing_wrapper">
+                <button class="action" id="clearBuzz"><i class="fa-solid fa-trash"></i> Clear Buzz</button>
+                <button class="action" id="markCorrect" disabled><i class="fa-solid fa-check"></i> Mark Correct</button>
+                <button class="action" id="markIncorrect" disabled><i class="fa-solid fa-xmark"></i> Mark Incorrect</button>
+            </div>
             <div id="timer_wrapper">
                 <div class="left">
                     <div id="timer">0:00:45.00</div>
@@ -129,11 +129,16 @@
         <div id="preview">
         </div>
         <div id="controls">
-            <button class="action" id="upload">Upload Question Set</button>
-            <button class="action" id="download">Copy Question Set</button>
-            <button class="action" id="uploadExample">Try Example Set (Latest AIME)</button>
-            <button class="action" id="toggleWaitingRoom">Waiting Room</button>
-            <button class="action" id="openQuestionEditor">Open Question Creator</button>
+            <div id="essential">
+                <button class="action" id="upload"><i class="fa-solid fa-upload"></i> Upload Question Set</button>
+                <button class="action" id="toggleWaitingRoom"><i class="fa-solid fa-hourglass-end"></i> Waiting Room</button>
+                <button class="action" id="toggleSpectators"><i class="fa-solid fa-binoculars"></i> Hide Spectators</button>
+            </div>
+            <div id="misc">
+                <button class="action" id="download">Copy Question Set</button>
+                <button class="action" id="uploadExample">Try Example Set (Latest AIME)</button>
+                <button class="action" id="openQuestionEditor">Open Question Creator</button>
+            </div>
         </div>
     </aside>
 </main>
@@ -165,6 +170,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="scripts/admin.js" type="module" defer></script>
 <script src="scripts/utils.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prompts-js"></script>
 
 </body>
 </html>

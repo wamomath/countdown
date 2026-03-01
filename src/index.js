@@ -196,11 +196,6 @@ io.on("connection", (socket) => {
         io.to(room).emit("buzz", data)
     })
 
-    socket.on("clearbuzz", (data) =>{
-        let room = data.room
-
-        io.to(room).emit("clearbuzz", data)
-    })
 
 
     socket.on("toggleWaitingRoom", (data) => {

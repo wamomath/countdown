@@ -172,6 +172,7 @@ footer .right {
     display: flex;
     flex-direction: row;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .bar {
@@ -183,4 +184,8 @@ footer .right {
     width: 100px;
     height: 10px;
     flex: 1;
+}
+
+#vsbar{
+    flex-wrap: wrap;
 }

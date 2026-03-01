@@ -17,6 +17,7 @@ body{
     display: flex;
     flex-direction: column;
     height: 100vh;
+    overflow: hidden;
 }
 
 header{
@@ -65,6 +66,7 @@ main{
     flex-wrap: wrap;
     align-items: center;
     display: flex;
+    overflow: hidden;
 }
 
 #divider{
@@ -76,6 +78,10 @@ aside{
     flex: 1;
     min-width: 300px;
     height: 100%;
+}
+
+aside#navigation{
+    min-width: 0;
 }
 
 aside h1{
@@ -355,4 +361,77 @@ div#devices_wrapper {
 
 #timer_wrapper .right #continueTimer{
     flex: 1;
+}
+
+#clearBuzz[disabled], #markCorrect[disabled], #markIncorrect[disabled]{
+    opacity: 0.2;
+}
+
+#buzzing_wrapper{
+    display: flex;
+    gap: 20px;
+}
+
+#clearBuzz{
+    background:#57534e;
+}
+
+#markCorrect{
+    background: #16a34a;
+    flex: 1;
+}
+
+#markIncorrect{
+    background:#dc2626;
+    flex: 1;
+}
+
+#gamecontrol{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pwindow_info{
+    position: relative;
+    transform: translate(-10px, -25px);
+    text-align: right;
+}
+
+#score_wrapper{
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+#score_wrapper button{
+    flex: 1;
+}
+
+#updateNames{
+    background: #475569;
+}
+
+#resetscores{
+    background: #e11d48;
+}
+
+#overridescores{
+    background: #ca8a04;
+}
+
+#misc{
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+}
+
+#misc button{
+    background: #475569;
+}
+
+dialog:-internal-dialog-in-top-layer::backdrop{
+    background: rgba(0, 0, 0, 0.8);
 }
