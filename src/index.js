@@ -12,7 +12,10 @@ let ROOMS = {
     "WAMO": {
         key: "countdown",
         devices: {},
-        questions: [
+        names: { competitor1: "", competitor2: "", c1seed: "1", c2seed: "1" },
+        scores: { p1: 0, p2: 0 },
+        theme: "light",
+        questions:[
             {"statement": "WAMO Countdown Platform", "timeMS": 0},
             {"statement": "Test Slide (the answer is 1434)", "timeMS": 10000},
             {"statement": "Answer: 1434", "timeMS": 0}
@@ -25,7 +28,7 @@ let ROOMS = {
         waiting: true,
         cur: 0
     }
-} // Room Name : Room Key
+}// Room Name : Room Key
 
 io.on("connection", (socket) => {
     // ...
@@ -42,10 +45,24 @@ io.on("connection", (socket) => {
         }
     })
 
+    socket.on("observerJoin", (data) => {
+        socket.join(data.room)
+        let roomData = ROOMS[data.room]
+        if (roomData) {
+            socket.emit("observerSync", roomData)
+        }
+    })
+
     socket.on("adminJoin", (data) => {
         socket.join([data.room, data.room + "_ADMIN"])
         socket.emit("adminJoin", ROOMS[data.room])
         socket.emit("startTimer", ROOMS[data.room].timing)
+    })
+
+    socket.on("toggleTheme", (data) => {
+        let room = data.room
+        ROOMS[room].theme = ROOMS[room].theme === "light" ? "dark" : "light"
+        io.to(room).to(room + "_ADMIN").emit("themeUpdate", { theme: ROOMS[room].theme })
     })
 
     socket.on("disconnect", (reason) => {
@@ -103,19 +120,20 @@ io.on("connection", (socket) => {
 
     socket.on("updateNames", (data) => {
         let room = data.room
-
+        ROOMS[room].names = data
         io.to(room).emit("updateNames", data)
     })
 
     socket.on("updateScores", (data) => {
         let room = data.room
-
+        if (data.playernum == 1) ROOMS[room].scores.p1++
+        if (data.playernum == 2) ROOMS[room].scores.p2++
         io.to(room).emit("updateScores", data)
     })
 
     socket.on("resetScores", (data) => {
         let room = data.room
-
+        ROOMS[room].scores = { p1: 0, p2: 0 }
         io.to(room).emit("resetScores", data)
     })
 
@@ -232,7 +250,23 @@ app.get("/converter", (req, res) => {
     res.sendFile(__dirname + "/converter.html")
 })
 
+app.get("/observe", (req, res) => {
+    let key = req.query.key
+    if (!ROOMS.hasOwnProperty(req.query.room)){
+        res.redirect('/?err=0')
+        return
+    }
+    let room = req.query.room.toUpperCase()
+    if (ROOMS[room].key !== key){
+        res.redirect('/?err=1')
+        return
+    }
+    res.sendFile(__dirname + "/observe.html")
+})
 
+app.get("/scripts/observe.js", (req, res) => {
+    res.sendFile(__dirname + "/scripts/observe.js")
+})
 
 app.get("/styles/lander.css", (req, res) => {
     res.sendFile(__dirname + "/styles/lander.css")

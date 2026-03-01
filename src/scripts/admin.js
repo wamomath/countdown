@@ -515,6 +515,14 @@ const prepWindows = () => {
     document.querySelector(`.window[data-id="${cur}"]`).classList.add("cur");
 };
 
+document.getElementById("toggleTheme").onclick = () => {
+    socket.emit("toggleTheme", { room: ROOM });
+};
+
+socket.on("themeUpdate", (data) => {
+    document.getElementById("toggleTheme").innerText = data.theme === "dark" ? "Toggle Light Theme" : "Toggle Dark Theme";
+});
+
 const prepQuestions = (data) => {
     roomData = data;
     for (let user in data.devices) {

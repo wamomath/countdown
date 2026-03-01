@@ -10,6 +10,18 @@ const ROOM = PARAMS.get("room").toUpperCase();
 
 const socket = io();
 
+const applyTheme = (theme) => {
+    if (theme === "dark") {
+        document.body.classList.add("dark-theme");
+    } else {
+        document.body.classList.remove("dark-theme");
+    }
+};
+
+socket.on("themeUpdate", (data) => {
+    applyTheme(data.theme);
+});
+
 let questions;
 
 const htmlCore = core(presetHTML5());
@@ -61,13 +73,27 @@ socket.on("clientDeny", () => {
 socket.on("clientAccept", (data) => {
     accepted = true;
     document.getElementById("waiting").style.display = "none";
-
     questions = data.questions;
+
+    applyTheme(data.theme); // Apply theme immediately
+
+    // Sync Late Scores
+    if (data.names && data.names.competitor1) {
+        document.getElementById("p1name").innerHTML = `[${data.names.c1seed}] ${data.names.competitor1}`;
+        document.getElementById("p2name").innerHTML = `${data.names.competitor2}[${data.names.c2seed}]`;
+    }
+    if (data.scores) {
+        curp1score = data.scores.p1;
+        curp2score = data.scores.p2;
+        for(let i=1; i<=3; i++) {
+            document.getElementById(`bar1${i}`).style.backgroundColor = i <= curp1score ? "#5cb85c" : "rgb(217, 83, 79)";
+            document.getElementById(`bar2${i}`).style.backgroundColor = i <= curp2score ? "#5cb85c" : "rgb(217, 83, 79)";
+        }
+    }
 
     document.getElementById("questions").style.display = "block";
     document.getElementById("timer").style.display = "block";
     document.getElementById("vsbar").style.display = "flex";
-
     display(Number(data.cur));
 });
 
@@ -168,14 +194,12 @@ socket.on("buzz", (data) => {
 })
 
 //clearbuzz removes the buzz
-socket.on("clearbuzz", (data) =>{
-    document.getElementById("p1").style.backgroundColor = "white";
-    document.getElementById("p2").style.backgroundColor = "white";
-    document.getElementById("progress").style.backgroundColor = "#5cb85c"
-    document.getElementById("timer").style.backgroundColor = "#020617"
-    if (!hasbuzzedtoggle) {
-        hasbuzzed = false;
-    }
+socket.on("clearbuzz", (data) => {
+    document.getElementById("p1").style.backgroundColor = "";
+    document.getElementById("p2").style.backgroundColor = "";
+    document.getElementById("progress").style.backgroundColor = "#5cb85c";
+    document.getElementById("timer").style.backgroundColor = "#020617";
+    if (!hasbuzzedtoggle) hasbuzzed = false;
 })
 
 //pause animation for timer

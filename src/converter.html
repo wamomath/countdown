@@ -49,7 +49,7 @@
             let jsonlist = []
             for (let i = 0; i < linelist.length; i++){
                 jsonlist.push({"statement":problist[i],"timeMS":45000})
-                jsonlist.push({"statement":"Answer: \$"+answerlist[i]+"\$","timeMS":0})
+                jsonlist.push({"statement":"Answer: "+answerlist[i],"timeMS":0})
             }
             document.getElementById("output").value = JSON.stringify(jsonlist)
         }

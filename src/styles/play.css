@@ -176,3 +176,34 @@ footer .right {
     height: 10px;
     flex: 1;
 }
+
+body { transition: background-color 0.3s, color 0.3s; }
+body.dark-theme main { background-color: #022c22; }
+
+body.dark-theme #waiting, 
+body.dark-theme #questions, 
+body.dark-theme #vsbar {
+    background-color: #064e3b;
+    color: #ecfdf5;
+    border-color: #34d399;
+}
+
+body.dark-theme #rules {
+    background-color: #022c22;
+    color: #ecfdf5;
+}
+
+body.dark-theme footer {
+    background-color: #064e3b;
+    border-top: 2px solid #34d399;
+}
+
+body.dark-theme footer .left,
+body.dark-theme footer .right,
+body.dark-theme .competitor {
+    color: #ecfdf5;
+}
+
+body.dark-theme .competitor_bars .bar {
+    border-color: #34d399;
+}
