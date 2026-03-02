@@ -435,3 +435,40 @@ div#devices_wrapper {
 dialog:-internal-dialog-in-top-layer::backdrop{
     background: rgba(0, 0, 0, 0.8);
 }
+
+.inline-confirm{
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px 4px 10px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: Inter, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    white-space: nowrap;
+}
+
+.inline-confirm-yes, .inline-confirm-no{
+    border: none;
+    border-radius: 4px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.inline-confirm-yes{
+    background: #16a34a;
+    color: white;
+}
+
+.inline-confirm-no{
+    background: #dc2626;
+    color: white;
+}

@@ -7,6 +7,61 @@ const PARAMS = new URLSearchParams(window.location.search);
 const USERNAME = PARAMS.get("name").toUpperCase();
 const ROOM = PARAMS.get("room").toUpperCase();
 
+let activePopover = null;
+const inlineConfirm = (e, label) => {
+    return new Promise((resolve) => {
+        if (activePopover) {
+            activePopover.remove();
+            activePopover = null;
+        }
+
+        let pop = document.createElement("div");
+        pop.className = "inline-confirm";
+
+        let text = document.createElement("span");
+        text.textContent = label;
+
+        let yes = document.createElement("button");
+        yes.className = "inline-confirm-yes";
+        yes.innerHTML = '<i class="fa-solid fa-check"></i>';
+
+        let no = document.createElement("button");
+        no.className = "inline-confirm-no";
+        no.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+        pop.appendChild(text);
+        pop.appendChild(yes);
+        pop.appendChild(no);
+
+        let rect = e.currentTarget.getBoundingClientRect();
+        pop.style.position = "fixed";
+        pop.style.left = (rect.right + 6) + "px";
+        pop.style.top = (rect.top + rect.height / 2) + "px";
+        pop.style.transform = "translateY(-50%)";
+
+        document.body.appendChild(pop);
+        activePopover = pop;
+
+        let cleanup = (result) => {
+            pop.remove();
+            document.removeEventListener("pointerdown", outsideClick);
+            clearTimeout(timeout);
+            if (activePopover === pop) activePopover = null;
+            resolve(result);
+        };
+
+        yes.onclick = (ev) => { ev.stopPropagation(); cleanup(true); };
+        no.onclick = (ev) => { ev.stopPropagation(); cleanup(false); };
+
+        let outsideClick = (ev) => {
+            if (!pop.contains(ev.target)) cleanup(false);
+        };
+        setTimeout(() => document.addEventListener("pointerdown", outsideClick), 0);
+
+        let timeout = setTimeout(() => cleanup(false), 3000);
+    });
+};
+
 const socket = io();
 
 const htmlCore = core(presetHTML5());
@@ -396,11 +451,8 @@ const prepWindows = () => {
         e.classList.remove("cur");
 
         let j = i;
-        e.onclick = async () => {
-            if (!await Prompts.confirm("Are you sure you want to move to slide " + j + "?")) {
-                return;
-            }
-
+        e.onclick = async (ev) => {
+            if (!await inlineConfirm(ev, "Slide " + j + "?")) return;
             game.cur.update(j)
         };
 
@@ -443,19 +495,13 @@ const startTimer = (duration, start) => {
 // New framework
 
 const setCallbacks = () => {
-    document.getElementById("move_left").onclick = async () => {
-        if (!await Prompts.confirm("Are you sure you want to move back?")) {
-            return;
-        }
-
+    document.getElementById("move_left").onclick = async (ev) => {
+        if (!await inlineConfirm(ev, "Move back?")) return;
         game.cur.update(Math.max(0, game.cur.getData() - 1));
     };
 
-    document.getElementById("move_right").onclick = async () => {
-        if (!await Prompts.confirm("Are you sure you want to move forward?")) {
-            return;
-        }
-
+    document.getElementById("move_right").onclick = async (ev) => {
+        if (!await inlineConfirm(ev, "Move forward?")) return;
         game.cur.update(Math.min(game.questions.getData().length - 1, game.cur.getData() + 1));
     };
 
