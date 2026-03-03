@@ -205,6 +205,11 @@ class TimingProperty extends Property{
             progressBarCounter++;
             document.getElementById("progress").style.backgroundColor = "lightgreen";
             document.getElementById("timer").style.backgroundColor = "lightgreen";
+        } else if (data.state === "reading") {
+            document.getElementById("favicon").href = "/assets/alarmred.svg";
+            document.getElementById("progress").style.backgroundColor = "#5cb85c";
+            document.getElementById("timer").style.backgroundColor = "#020617";
+            setProgressBar(0, 0);
         } else {
             document.getElementById("favicon").href = "/assets/alarmred.svg";
             document.getElementById("progress").style.backgroundColor = "#5cb85c";
@@ -250,8 +255,9 @@ document.addEventListener('keydown', function(event) {
     }
     let timing = game.timing.getData();
     let buzzed = game.buzzed.getData();
+    let isReading = timing.state === "reading";
     let timeRemaining = (timing.start + timing.duration - timing.elapsed) - getSyncedServerTime();
-    let canBuzz = timing.state === "running" && timeRemaining > 0;
+    let canBuzz = (timing.state === "running" && timeRemaining > 0) || isReading;
 
     if (event.key === ' ' && game.competitor.isCompetitor1() && canBuzz && !buzzed.competitor1){
         console.log("buzzing c1")
@@ -259,9 +265,9 @@ document.addEventListener('keydown', function(event) {
         document.getElementById("p1").style.backgroundColor = "lightgreen";
         game.buzzed.update({ competitor1: true, competitor2: buzzed.competitor2, lastBuzzer: 1 });
         game.timing.update({
-            start: timing.start,
+            start: isReading ? getSyncedServerTime() : timing.start,
             duration: timing.duration,
-            elapsed: timing.elapsed + getSyncedServerTime() - timing.start,
+            elapsed: isReading ? 0 : timing.elapsed + getSyncedServerTime() - timing.start,
             state: "paused"
         });
     } else if (event.key === ' ' && game.competitor.isCompetitor2() && canBuzz && !buzzed.competitor2){
@@ -270,9 +276,9 @@ document.addEventListener('keydown', function(event) {
         document.getElementById("p2").style.backgroundColor = "lightgreen";
         game.buzzed.update({ competitor1: buzzed.competitor1, competitor2: true, lastBuzzer: 2 });
         game.timing.update({
-            start: timing.start,
+            start: isReading ? getSyncedServerTime() : timing.start,
             duration: timing.duration,
-            elapsed: timing.elapsed + getSyncedServerTime() - timing.start,
+            elapsed: isReading ? 0 : timing.elapsed + getSyncedServerTime() - timing.start,
             state: "paused"
         });
     }

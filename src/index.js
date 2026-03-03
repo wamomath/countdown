@@ -245,10 +245,10 @@ io.on("connection", (socket) => {
 
         if (identifier === "cur" && ROOMS.get(room).questions){
             ROOMS.get(room)["timing"] = {
-                start: Date.now(),
+                start: 0,
                 duration: ROOMS.get(room).questions[Number(data)].timeMS,
                 elapsed: 0,
-                state: "running"
+                state: "reading"
             }
 
             ROOMS.get(room)["buzzed"] = {

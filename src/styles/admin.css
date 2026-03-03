@@ -363,6 +363,11 @@ div#devices_wrapper {
     flex: 1;
 }
 
+#readingToggle.active{
+    background: #3b82f6;
+    color: white;
+}
+
 #clearBuzz[disabled], #markCorrect[disabled], #markIncorrect[disabled]{
     opacity: 0.2;
 }

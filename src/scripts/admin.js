@@ -468,6 +468,25 @@ const setCallbacks = () => {
         });
     };
 
+    document.getElementById("readingToggle").onclick = () => {
+        let timing = game.timing.getData();
+        if (timing.state === "reading") {
+            game.timing.update({
+                start: game.getTime(),
+                duration: game.questions.getData()[game.cur.getData()].timeMS,
+                elapsed: 0,
+                state: "running"
+            });
+        } else {
+            game.timing.update({
+                start: 0,
+                duration: game.questions.getData()[game.cur.getData()].timeMS,
+                elapsed: 0,
+                state: "reading"
+            });
+        }
+    };
+
     document.getElementById("continueTimer").onclick = () => {
         let timing = game.timing.getData();
         if (timing.state === "paused") {
@@ -477,7 +496,7 @@ const setCallbacks = () => {
                 elapsed: timing.elapsed,
                 state: "running"
             });
-        }else if (timing.state === "stopped"){
+        }else if (timing.state === "stopped" || timing.state === "reading"){
             game.timing.update({
                 start: game.getTime(),
                 duration: game.questions.getData()[game.cur.getData()].timeMS,
@@ -507,6 +526,9 @@ const setCallbacks = () => {
 class TimingProperty extends Property{
     renderInternal(){
         let data = this.getData();
+        let readingBtn = document.getElementById("readingToggle");
+        readingBtn.classList.remove("active");
+
         if (data.state === "running") {
             startTimer(data.duration - data.elapsed, data.start);
             document.querySelector("#continueTimer i").className = "fa-solid fa-circle-pause"
@@ -515,6 +537,12 @@ class TimingProperty extends Property{
             document.getElementById("timer").style.background = "#fff1f2";
             clearInterval(timerInterval);
             document.querySelector("#continueTimer i").className = "fa-solid fa-circle-play"
+        } else if (data.state === "reading") {
+            document.getElementById("timer").style.background = "#dbeafe";
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = "READING";
+            document.querySelector("#continueTimer i").className = "fa-solid fa-circle-play"
+            readingBtn.classList.add("active");
         } else {
             document.getElementById("timer").style.background = "#fff1f2";
             clearInterval(timerInterval);
