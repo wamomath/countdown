@@ -124,6 +124,7 @@ io.on("connection", (socket) => {
                 })
             }
 
+
             if (socket.id === ROOMS.get(room).competitor.competitor1){
                 ROOMS.get(room).competitor.competitor1 = null
             }

@@ -195,21 +195,21 @@ class TimingProperty extends Property{
     renderInternal(){
         let data = this.getData();
         if (data.state === "running") {
+            let currentElapsed = data.elapsed + (getSyncedServerTime() - data.start);
+            setProgressBar(data.duration, currentElapsed);
             document.getElementById("favicon").href = "/assets/alarmgreen.svg";
             document.getElementById("progress").style.backgroundColor = "#5cb85c";
             document.getElementById("timer").style.backgroundColor = "#020617";
-            let currentElapsed = data.elapsed + (getSyncedServerTime() - data.start);
-            setProgressBar(data.duration, currentElapsed);
         } else if (data.state === "paused") {
             document.getElementById("favicon").href = "/assets/alarmred.svg";
             progressBarCounter++;
             document.getElementById("progress").style.backgroundColor = "lightgreen";
             document.getElementById("timer").style.backgroundColor = "lightgreen";
         } else if (data.state === "reading") {
-            document.getElementById("favicon").href = "/assets/alarmred.svg";
-            document.getElementById("progress").style.backgroundColor = "#5cb85c";
-            document.getElementById("timer").style.backgroundColor = "#020617";
             setProgressBar(0, 0);
+            document.getElementById("favicon").href = "/assets/alarmred.svg";
+            document.getElementById("progress").style.backgroundColor = "#7dd3fc";
+            document.getElementById("timer").style.backgroundColor = "#020617";
         } else {
             document.getElementById("favicon").href = "/assets/alarmred.svg";
             document.getElementById("progress").style.backgroundColor = "#5cb85c";
@@ -264,11 +264,12 @@ document.addEventListener('keydown', function(event) {
         buzz1.play()
         document.getElementById("p1").style.backgroundColor = "lightgreen";
         game.buzzed.update({ competitor1: true, competitor2: buzzed.competitor2, lastBuzzer: 1 });
+
         game.timing.update({
             start: isReading ? getSyncedServerTime() : timing.start,
             duration: timing.duration,
             elapsed: isReading ? 0 : timing.elapsed + getSyncedServerTime() - timing.start,
-            state: "paused"
+            state: isReading ? "reading" : "paused"
         });
     } else if (event.key === ' ' && game.competitor.isCompetitor2() && canBuzz && !buzzed.competitor2){
         console.log("buzzing c2")
@@ -279,7 +280,7 @@ document.addEventListener('keydown', function(event) {
             start: isReading ? getSyncedServerTime() : timing.start,
             duration: timing.duration,
             elapsed: isReading ? 0 : timing.elapsed + getSyncedServerTime() - timing.start,
-            state: "paused"
+            state: isReading ? "reading" : "paused"
         });
     }
 });

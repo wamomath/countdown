@@ -17,7 +17,6 @@ body{
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow: hidden;
 }
 
 header{
@@ -66,7 +65,6 @@ main{
     flex-wrap: wrap;
     align-items: center;
     display: flex;
-    overflow: hidden;
 }
 
 #divider{
