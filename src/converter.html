@@ -6,6 +6,10 @@
     <title>CDR Converter</title>
 
     <link id="favicon" rel="icon" href="assets/logo.png">
+    <style>
+        textarea { width: 100%; height: 150px; margin-bottom: 10px; font-family: monospace; }
+        main { max-width: 800px; margin: 0 auto; }
+    </style>
 </head>
 <body>
     <section>
@@ -15,36 +19,31 @@
             <br>
             <button id="convert" onclick="convert()">Convert</button>
             <br>
-            <textarea id="output"></textarea>
-            <!--\item What is the units digit of $7^{67}$? % 3
-
-            \item If $x+\frac{1}{x}=5$, what is the value of $x^2+\frac{1}{x^2}$? % 23
-
-            \item A regular hexagon is inscribed in a circle of radius $8$. What is the area of the hexagon? % 96\sqrt{3}
-
-            \item A runner runs $15$ miles at $5$ miles per hour and then $15$ miles back at $3$ miles per hour. How many hours does the whole trip take? % 8
-
-            \item What is the value of $2025^2-2024^2+1$? % 4050
-
-            \item The sum of three consecutive integers is $99$. What is the largest of the three? % 34
-
-            \item Evaluate $(50^2-49^2)+(49^2-48^2)+\dots+(11^2-10^2)$. % 2400
-
-            \item If $x+\frac{1}{x}=6$, what is the value of $x^3+\frac{1}{x^3}$? % 198
-
-            \item A square and an equilateral triangle have equal perimeters. If the square has an area of $27$, what is the area of the triangle? % 12\sqrt{3}
-
-            \item How many ways can Alice, Bob, Charlie, Dana, and Edison sit in a row if Bob and Edison insist on sitting next to each other? % 48-->
+            <textarea id="output" placeholder="JSON output will appear here..."></textarea>
         </main>
     </section>
     <script>
         function convert(){
-            let linelist = document.getElementById("input").value.split("\n\n")
-            let problist = []
-            let answerlist = []
-            for (let i = 0; i < linelist.length; i++){
-                problist.push(linelist[i].split("\%")[0].slice(6).trim())
-                answerlist.push(linelist[i].split("\%")[1].trim())
+            let inputText = document.getElementById("input").value.trim();
+            if (!inputText) return;
+            
+            let linelist = inputText.split(/\n\s*\n/);
+            let jsonlist = [];
+
+            for (let i = 0; i < linelist.length; i++) {
+                if (!linelist[i].trim()) continue;
+
+                let parts = linelist[i].split(/(?<!\\)%/);
+                
+                let prob = parts[0].trim();
+                if (prob.startsWith("\\item")) {
+                    prob = prob.slice(5).trim();
+                }
+
+                let ans = parts.slice(1).join("%").trim();
+
+                jsonlist.push({"statement": prob, "timeMS": 45000});
+                jsonlist.push({"statement": "Answer: " + ans, "timeMS": 0});
             }
             let jsonlist = []
             for (let i = 0; i < linelist.length; i++){
