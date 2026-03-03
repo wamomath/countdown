@@ -249,7 +249,7 @@ io.on("connection", (socket) => {
                 start: 0,
                 duration: ROOMS.get(room).questions[Number(data)].timeMS,
                 elapsed: 0,
-                state: "reading"
+                state: ROOMS.get(room).questions[Number(data)].timeMS ? "reading" : "running"
             }
 
             ROOMS.get(room)["buzzed"] = {
