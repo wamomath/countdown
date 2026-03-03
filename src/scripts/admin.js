@@ -730,7 +730,10 @@ class CompetitorNamesProperty extends Property{
     renderInternal() {
         document.getElementById("p1name").innerHTML = `[${this.data.seed1}] ${this.data.name1}`;
         document.getElementById("p2name").innerHTML = `${this.data.name2} [${this.data.seed2}]`;
-
+        document.getElementById("competitor1").value = this.data.name1 ?? "";
+        document.getElementById("competitor2").value = this.data.name2 ?? "";
+        document.getElementById("c1seed").value = this.data.seed1 ?? "1";
+        document.getElementById("c2seed").value = this.data.seed2 ?? "1";
     }
 }
 

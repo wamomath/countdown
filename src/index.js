@@ -10,47 +10,74 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-let ROOMS = {
-    "WAMO": {
-        adminList: {},
-        key: "countdown",
-        devices: {},
-        questions: [
-            {"statement": "WAMO Countdown Platform", "timeMS": 0},
-            {"statement": "Test Slide (the answer is 1434)", "timeMS": 10000},
-            {"statement": "Answer: 1434", "timeMS": 0}
-        ],
-        timing: {
-            start: 0,
-            duration: 0,
-            elapsed: 0,
-            state: "stopped"
-        },
-        waiting: true,
-        cur: 0,
-        competitor: {
-            competitor1: null,
-            competitor2: null
-        },
-        competitorNames: {},
-        buzzed: {
-            competitor1: false,
-            competitor2: false,
-            lastBuzzer: null
-        },
-        scores: {
-            player1: 0,
-            player2: 0
+class RoomManager{
+    rooms;
+    
+    constructor(){
+        this.rooms = {}
+    }
+    
+    has(room){
+        return this.rooms.hasOwnProperty(room.toUpperCase())
+    }
+    
+    get(room){
+        if (!this.has(room.toUpperCase())){
+            this.create(room.toUpperCase())
+        }
+        
+        return this.rooms[room.toUpperCase()]
+    }
+    
+    create(name){
+        this.rooms[name.toUpperCase()] = RoomManager.getRoomTemplate()
+    }
+    
+    static getRoomTemplate = () => {
+        return {
+            adminList: {},
+            key: "countdown",
+            devices: {},
+            questions: [
+                {"statement": "WAMO Countdown Platform", "timeMS": 0},
+                {"statement": "Test Slide (the answer is 1434)", "timeMS": 10000},
+                {"statement": "Answer: 1434", "timeMS": 0}
+            ],
+            timing: {
+                start: 0,
+                duration: 0,
+                elapsed: 0,
+                state: "stopped"
+            },
+            waiting: true,
+            cur: 0,
+            competitor: {
+                competitor1: null,
+                competitor2: null
+            },
+            competitorNames: {},
+            buzzed: {
+                competitor1: false,
+                competitor2: false,
+                lastBuzzer: null
+            },
+            scores: {
+                player1: 0,
+                player2: 0
+            }
         }
     }
-} // Room Name : Room Key
+}
+
+let ROOMS = new RoomManager()
+ROOMS.create("WAMO")
 
 io.on("connection", (socket) => {
     // ...
 
     socket.on("clientJoin", (data) => {
         socket.join(data.room)
-        ROOMS[data.room].devices[socket.id] = {
+        ROOMS.get(data.room).devices[socket.id] = {
             name: data.name,
             status: false,
         }
@@ -58,56 +85,56 @@ io.on("connection", (socket) => {
         io.to(data.room + "_ADMIN").emit("roomStateUpdate", {
             room: data.room,
             identifier: "devices",
-            data: ROOMS[data.room].devices
+            data: ROOMS.get(data.room).devices
         })
 
     })
 
     socket.on("adminJoin", (data) => {
         socket.join([data.room, data.room + "_ADMIN"])
-        socket.emit("adminJoin", ROOMS[data.room])
+        socket.emit("adminJoin", ROOMS.get(data.room))
 
-        ROOMS[data.room].adminList[socket.id] = data.username
+        ROOMS.get(data.room).adminList[socket.id] = data.username
         io.to(data.room + "_ADMIN").emit("roomStateUpdate", {
             room: data.room,
             identifier: "adminList",
-            data: ROOMS[data.room].adminList
+            data: ROOMS.get(data.room).adminList
         })
     })
 
     socket.on("disconnecting", (reason) => {
         let curRoom = "";
         for (let room of socket.rooms){
-            if (!ROOMS.hasOwnProperty(room)){
+            if (!ROOMS.has(room)){
                 continue;
             }
 
 
-            if (ROOMS[room].devices.hasOwnProperty(socket.id)){
-                delete ROOMS[room].devices[socket.id]
+            if (ROOMS.get(room).devices.hasOwnProperty(socket.id)){
+                delete ROOMS.get(room).devices[socket.id]
                 curRoom = room
             }
 
-            if (ROOMS[room].adminList.hasOwnProperty(socket.id)){
-                delete ROOMS[room].adminList[socket.id]
+            if (ROOMS.get(room).adminList.hasOwnProperty(socket.id)){
+                delete ROOMS.get(room).adminList[socket.id]
                 io.to(room + "_ADMIN").emit("roomStateUpdate", {
                     room: room,
                     identifier: "adminList",
-                    data: ROOMS[room].adminList
+                    data: ROOMS.get(room).adminList
                 })
             }
 
-            if (socket.id === ROOMS[room].competitor.competitor1){
-                ROOMS[room].competitor.competitor1 = null
+            if (socket.id === ROOMS.get(room).competitor.competitor1){
+                ROOMS.get(room).competitor.competitor1 = null
             }
 
-            if (socket.id === ROOMS[room].competitor.competitor2) {
-                ROOMS[room].competitor.competitor2 = null
+            if (socket.id === ROOMS.get(room).competitor.competitor2) {
+                ROOMS.get(room).competitor.competitor2 = null
             }
         }
 
 
-        if (!ROOMS.hasOwnProperty(curRoom)){
+        if (!ROOMS.has(curRoom)){
             return;
         }
 
@@ -115,13 +142,13 @@ io.on("connection", (socket) => {
         io.to(curRoom).emit("roomStateUpdate", {
             room: curRoom,
             identifier: 'competitor',
-            data: ROOMS[curRoom].competitor
+            data: ROOMS.get(curRoom).competitor
         })
 
         io.to(curRoom).emit("roomStateUpdate", {
             room: curRoom,
             identifier: 'devices',
-            data: ROOMS[curRoom].devices
+            data: ROOMS.get(curRoom).devices
         })
     })
 
@@ -130,14 +157,14 @@ io.on("connection", (socket) => {
         let room = data.room
 
         io.to(room + "_ADMIN").emit("clientAccept", data)
-        io.to(id).emit("clientAccept", ROOMS[room])
+        io.to(id).emit("clientAccept", ROOMS.get(room))
 
-        ROOMS[room].devices[id].status = true
+        ROOMS.get(room).devices[id].status = true
 
         io.to(room + "_ADMIN").emit("roomStateUpdate", {
             room: room,
             identifier: 'devices',
-            data: ROOMS[room].devices
+            data: ROOMS.get(room).devices
         })
 
     })
@@ -148,19 +175,19 @@ io.on("connection", (socket) => {
 
         io.to(room + "_ADMIN").emit("clientDeny", data)
         io.to(id).emit("clientDeny", data)
-        delete ROOMS[room].devices[id]
+        delete ROOMS.get(room).devices[id]
 
         io.to(room + "_ADMIN").emit("roomStateUpdate", {
             room: room,
             identifier: 'devices',
-            data: ROOMS[room].devices
+            data: ROOMS.get(room).devices
         })
     })
 
     socket.on("clientSwitch", (data) => {
         let room = data.room
 
-        ROOMS[room].cur = data.cur
+        ROOMS.get(room).cur = data.cur
 
         io.to(room + "_ADMIN").emit("clientSwitch", data)
         io.to(room).emit("clientSwitch", data)
@@ -169,11 +196,11 @@ io.on("connection", (socket) => {
     socket.on("clientUpload", (data) => {
         let room = data.room
 
-        ROOMS[room].cur = 0
+        ROOMS.get(room).cur = 0
 
-        ROOMS[room].questions = data.code
+        ROOMS.get(room).questions = data.code
 
-        io.to(room + "_ADMIN").emit("adminJoin", ROOMS[room])
+        io.to(room + "_ADMIN").emit("adminJoin", ROOMS.get(room))
         io.to(room).emit("clientUpload", data)
     })
 
@@ -201,9 +228,9 @@ io.on("connection", (socket) => {
     socket.on("toggleWaitingRoom", (data) => {
         let room = data.room
 
-        ROOMS[room].waiting = !ROOMS[room].waiting
+        ROOMS.get(room).waiting = !ROOMS.get(room).waiting
 
-        io.to(room).emit("toggleWaitingRoom", ROOMS[room])
+        io.to(room).emit("toggleWaitingRoom", ROOMS.get(room))
     })
 
     socket.on("roomStateUpdate", (payload) => {
@@ -211,20 +238,20 @@ io.on("connection", (socket) => {
         let data = payload.data
         let identifier = payload.identifier
 
-        ROOMS[room][identifier] = data
+        ROOMS.get(room)[identifier] = data
 
 
         io.to(room).emit("roomStateUpdate", payload)
 
-        if (identifier === "cur" && ROOMS[room].questions){
-            ROOMS[room]["timing"] = {
+        if (identifier === "cur" && ROOMS.get(room).questions){
+            ROOMS.get(room)["timing"] = {
                 start: Date.now(),
-                duration: ROOMS[room].questions[Number(data)].timeMS,
+                duration: ROOMS.get(room).questions[Number(data)].timeMS,
                 elapsed: 0,
                 state: "running"
             }
 
-            ROOMS[room]["buzzed"] = {
+            ROOMS.get(room)["buzzed"] = {
                 competitor1: false,
                 competitor2: false,
                 lastBuzzer: null
@@ -233,13 +260,13 @@ io.on("connection", (socket) => {
             io.to(room).emit("roomStateUpdate", {
                 room: room,
                 identifier: "timing",
-                data: ROOMS[room]["timing"]
+                data: ROOMS.get(room)["timing"]
             })
 
             io.to(room).emit("roomStateUpdate", {
                 room: room,
                 identifier: "buzzed",
-                data: ROOMS[room]["buzzed"]
+                data: ROOMS.get(room)["buzzed"]
             })
         }
     })
@@ -249,7 +276,7 @@ io.on("connection", (socket) => {
         let data = payload.data
         let identifier = payload.identifier
 
-        ROOMS[room][identifier] = data
+        ROOMS.get(room)[identifier] = data
 
 
         io.to(room + "_ADMIN").emit("roomStateUpdate", payload)
@@ -263,6 +290,21 @@ app.get("/", (req, res) => {
 })
 
 app.get("/admin", (req, res) => {
+
+    let name = req.query.name
+    let key = req.query.key
+    let room = req.query.room
+
+    if (ROOMS.get(room).key !== key){
+        res.redirect('/?err=1')
+        return
+    }
+
+    if (!name){
+        res.redirect('/?err=2')
+        return
+    }
+
     res.sendFile(__dirname + "/admin.html")
 })
 
@@ -283,14 +325,14 @@ app.get("/play", (req, res) => {
     let name = req.query.name
     let key = req.query.key
 
-    if (!ROOMS.hasOwnProperty(req.query.room)){
+    if (!req.query.room || !ROOMS.has(req.query.room)){
         res.redirect('/?err=0')
         return
     }
 
     let room = req.query.room.toUpperCase()
 
-    if (ROOMS[room].key !== key){
+    if (ROOMS.get(room).key !== key){
         res.redirect('/?err=1')
         return
     }
@@ -314,6 +356,7 @@ app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.use('/fonts', express.static(path.join(__dirname, 'fonts')));
 
+app.use(express.json({ limit: "100kb" }));
 
 server.listen(8000,() => {
     console.log("Server online at port *:8000")
