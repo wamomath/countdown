@@ -16,6 +16,41 @@
 
         <link id="favicon" rel="icon" href="assets/alarmgreen.svg" />
 
+        <script>
+            (function() {
+                // 1. Check if 'dev' parameter exists in the URL (?dev or ?dev=true)
+                if (new URLSearchParams(window.location.search).has('dev')) {
+                    alert("Dev mode enabled: Alerting all errors.");
+
+                    // 2. Set up global error handling
+                    window.onerror = function(message, source, lineno, colno, error) {
+                        console.log('error')
+                        // Construct the error message
+                        const errorMessage = [
+                            '🚨 DEV ERROR 🚨',
+                            `Message: ${message}`,
+                            `Source: ${source}`,
+                            `Line: ${lineno}:${colno}`,
+                            `Stack: ${error ? error.stack : 'No stack trace'}`
+                        ].join('\n');
+
+                        // 3. Alert the error
+                        alert(errorMessage);
+
+                        // Return true to prevent the error from showing in the console
+                        // Return false to let it show in console as well
+                        return false;
+                    };
+
+                    // 4. Catch unhandled Promise rejections (async/await errors)
+                    window.addEventListener('unhandledrejection', function(event) {
+                        alert(`🚨 ASYNC ERROR 🚨\n${event.reason}`);
+                    });
+                }
+            })();
+
+        </script>
+
         <title>Countdown Player</title>
     </head>
     <body>
